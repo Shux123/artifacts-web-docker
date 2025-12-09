@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content-info-block">
+
+        <h4>Create new character</h4>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.name.label }} {{ form.name }}
+            {{ form.skin.label }} {{ form.skin }}
+            {{ form.submit() }}
+        </form>
+
+</div>
+
+{% endblock %}

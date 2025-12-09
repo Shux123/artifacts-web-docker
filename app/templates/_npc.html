@@ -1,0 +1,52 @@
+<div class="content-info-block">
+    <p>
+    <a class="content-info-block-link" href="{{ url_for("main.npc", id=npc.id) }}"><h4>{{ npc.name }}</h4></a>
+    </p>
+    <p class="item-description">{{ npc.description }}</p>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+        <b>NPC code:</b> {{ npc.code }}<br>
+        <b>Type:</b> {{ npc.npc_type }}<br>
+        {% if npc.event %}
+            <b>Event:</b> <a href="{{ url_for('main.event', id=npc.event.id) }}">{{ npc.event.name }}</a> <br>
+        {% endif %}
+
+        {% for map in npc.maps %}
+            <b>Map: </b>{{ map.name }}, x: {{ map.x }}, y: {{ map.y }}<br>
+            <b>Layer: </b>{{ map.layer }}<br>
+        {% endfor %}
+        </div>
+
+    <div class="col-md-5">
+        <b>Items:</b><br>
+    <table>
+        <thead>
+            <th>Item</th>
+            <th>Currency</th>
+            <th>Buy price</th>
+            <th>Sell price</th>
+        </thead>
+    {% for npc_item in npc.npc_items %}
+        <tr>
+            <td><a href="{{ url_for('main.item', id=npc_item.item.id) }}">{{ npc_item.item.name }}</a></td>
+
+            {% if npc_item.gold %}
+            <td>Gold</td>
+            {% else %}
+            <td><a href="{{ url_for('main.item', id=npc_item.currency.id) }}">{{ npc_item.currency.name }}</a></td>
+            {% endif %}
+
+
+            <td>{{ npc_item.buy_price }}</td>
+            <td>{{ npc_item.sell_price }}</td>
+        </tr>
+        {% endfor %}
+    </table><br>
+
+    </div>
+    </div>
+    </div>
+    
+</div>

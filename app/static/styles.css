@@ -1,0 +1,81 @@
+.content-info-block {
+    border: 3px solid #e9e9e9;
+    border-radius: 12px;
+    margin: 3px;
+    padding: 5px;
+}
+h4 {
+    text-align: center;
+    color: chocolate;
+}
+table, th, td {
+  padding: 5px;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+.item-description {
+  text-align: center;
+  color: chocolate;
+  font-size: larger;
+}
+.item-craft {
+  text-align: center;
+}
+.content-info-block-link {
+  color: chocolate;
+  text-decoration: none;
+}
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+.image-table-cell {
+  position: relative;
+  width: auto;
+  border: 0px;
+  padding: 0px;
+  font-size: smaller;
+}
+.image-table-cell img {
+  width: auto;
+  height: auto;
+  display: block;
+}
+.table-cell-text-left-top {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background-color: rgba(233, 233, 233, 0.7);
+}
+.table-cell-text-right-top {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(233, 233, 233, 0.7);
+}
+.table-cell-text-center-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  background-color: rgba(233, 233, 233, 0.7);
+}
+.char-name {
+  font-size: 160%;
+  color: chocolate;
+}
+.char-right-side {
+  text-align: right;
+}
+.char-table {
+  padding: 0;
+  border: 0;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.text-left {
+  text-align: left;
+}

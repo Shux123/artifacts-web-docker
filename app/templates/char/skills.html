@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+        <h4>Skills</h4>
+
+    <table class="char-table">
+        <tr>
+            <td class="char-table"><b>Mining</b></td>
+            <td class="char-table">Level: {{ character.mining_level }}</td>
+            <td class="char-table">{{ character.mining_xp }}</td>
+            <td class="char-table"><progress value="{{ character.mining_xp }}" max="{{ character.mining_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.mining_max_xp }}</td>
+        </tr>
+        <tr>
+            <td class="char-table"><b>Woodcutting</b></td>
+            <td class="char-table">Level: {{ character.woodcutting_level }}</td>
+            <td class="char-table">{{ character.woodcutting_xp }}</td>
+            <td class="char-table"><progress value="{{ character.woodcutting_xp }}" max="{{ character.woodcutting_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.woodcutting_max_xp }}</td>
+        </tr>
+        <tr>
+            <td class="char-table"><b>Fishing</b></td>
+            <td class="char-table">Level: {{ character.fishing_level }}</td>
+            <td class="char-table">{{ character.fishing_xp }}</td>
+            <td class="char-table"><progress value="{{ character.fishing_xp }}" max="{{ character.fishing_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.fishing_max_xp }}</td>
+        </tr>
+        </tr>
+                <tr>
+            <td class="char-table"><b>Alchemy</b></td>
+            <td class="char-table">Level: {{ character.alchemy_level }}</td>
+            <td class="char-table">{{ character.alchemy_xp }}</td>
+            <td class="char-table"><progress value="{{ character.alchemy_xp }}" max="{{ character.alchemy_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.alchemy_max_xp }}</td>
+        </tr>
+        </tr>
+        <tr>
+            <td class="char-table"><b>Cooking</b></td>
+            <td class="char-table">Level: {{ character.cooking_level }}</td>
+            <td class="char-table">{{ character.cooking_xp }}</td>
+            <td class="char-table"><progress value="{{ character.cooking_xp }}" max="{{ character.cooking_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.cooking_max_xp }}</td>
+        </tr>
+        <tr>
+            <td class="char-table"><b>Weaponcrafting</b></td>
+            <td class="char-table">Level: {{ character.weaponcrafting_level }}</td>
+            <td class="char-table">{{ character.weaponcrafting_xp }}</td>
+            <td class="char-table"><progress value="{{ character.weaponcrafting_xp }}" max="{{ character.weaponcrafting_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.weaponcrafting_max_xp }}</td>
+        </tr>
+        <tr>
+            <td class="char-table"><b>Gearcrafting</b></td>
+            <td class="char-table">Level: {{ character.gearcrafting_level }}</td>
+            <td class="char-table">{{ character.gearcrafting_xp }}</td>
+            <td class="char-table"><progress value="{{ character.gearcrafting_xp }}" max="{{ character.gearcrafting_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.gearcrafting_max_xp }}</td>
+        </tr>
+                <tr>
+            <td class="char-table"><b>Jewelrycrafting</b></td>
+            <td class="char-table">Level: {{ character.jewelrycrafting_level }}</td>
+            <td class="char-table">{{ character.jewelrycrafting_xp }}</td>
+            <td class="char-table"><progress value="{{ character.jewelrycrafting_xp }}" max="{{ character.jewelrycrafting_max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.jewelrycrafting_max_xp }}</td>
+        </tr>
+    </table>
+
+</div>
+
+{% endblock %}
+

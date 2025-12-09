@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+
+<div class="container-fluid">
+<div class="row">
+
+    <div class="col-md-5">
+
+    <form method="POST">
+        {{ move_form.hidden_tag() }}
+        Map: {{ move_form.x_coord.label }} {{ move_form.x_coord }}
+        {{ move_form.y_coord.label }} {{ move_form.y_coord }}<br>
+        {{ move_form.layer.label }} {{ move_form.layer }}
+        {{ move_form.submit() }}
+    </form>
+    {% if character %}
+    {% if character.map.transition_to %}
+    <nav class="navbar py-0" data-bs-theme="light">
+        <div class="container-fluid">
+        <ul class="navbar-nav">
+        
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('char.transition', char_name=character.name) }}">
+                    Transition to {{ character.map.transition_to.map_to.layer }}</a> 
+            </li>      
+        </ul>
+        </div>
+    </nav>
+        {% for condition in character.map.transition_to.conditions %}
+
+        {% if condition.operator == 'has_item' %}
+            {% set item = Item.get_item_from_db(condition.code) %}
+            Has item:
+                <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+        {% elif condition.code == 'gold' %}
+            Cost: Gold x{{ condition.value }}
+        {% elif condition.operator == 'cost' and condition.code != 'gold' %}
+            Cost: 
+            {% set item = Item.get_item_from_db(condition.code) %}
+                <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+        {% endif %}
+
+        {% endfor %}
+
+    {% endif %}
+    {% endif %}
+
+    </div>
+
+    <div class="col-md-4">
+
+        {% if character.map %}
+        <b>Map name: </b>{{ character.map.name }}<br>
+        <b>Layer: </b>{{ character.map.layer }}<br>
+        {% if character.map.content_type %}
+        <b>Content: </b>{{ character.map.content_type }}<br>
+
+        {% if character.map.monster %}
+        <b>Monster: </b>
+            <a href="{{ url_for('main.monster', id=character.map.monster.id) }}">{{ character.map.monster.name }}</a>
+        {% elif character.map.resource %}
+        <b>Resource: </b>
+            <a href="{{ url_for('main.resource', id=character.map.resource.id) }}">{{ character.map.resource.name }}</a>
+        {% elif character.map.npc %}
+        <b>NPC: </b>
+            <a href="{{ url_for('main.npc', id=character.map.npc.id) }}">{{ character.map.npc.name }}</a>
+        {% else %}
+            <b>Code: </b>{{ character.map.content_code }}
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+    </div>
+
+        <div class="col-md-3">
+        {% if character.map %}
+        <img width="145" src="{{ url_for('static', filename=character.map.image_name) }}">
+        {% endif %}
+    </div>
+
+</div>
+</div>
+
+{% if character %}
+{% if character.map.monster %}
+<hr>
+<nav class="navbar navbar-expand-lg py-0">
+<ul class="navbar-nav">
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.rest', char_name=character.name) }}">
+        Rest</a></li>
+    {% if character.map.monster.monster_type == 'boss' %}
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.fight', char_name=character.name) }}">
+        Fight boss</a></li>
+    {% else %}
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.fight', char_name=character.name) }}">
+        Fight</a></li>
+    {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% if character.map.resource %}
+<hr>
+<nav class="navbar navbar-expand-lg py-0">
+<ul class="navbar-nav">
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.gathering', char_name=character.name) }}">
+        Gathering</a></li>
+    </ul>
+</nav>
+{% endif %}
+
+
+{% if action_details['fight'] %}
+<hr>
+    <b>Result: </b>{{ action_details['result'] }}<br>
+    <b>Turns: </b>{{ action_details['turns'] }}<br>
+    <b>Opponent: </b>
+        <a href="{{ url_for('main.monster', id=character.map.monster.id) }}">{{ character.map.monster.name }}</a><br>
+
+    {% for char in action_details['characters'] %}
+    
+    <b>Character: </b> 
+                    {% set character = Character.get_character_by_name(char['character_name']) %}
+                    <a href="{{ url_for('char.get_char', char_name=character.name) }}">
+                        {{ character.name }}</a><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>XP gained: </b>{{ char['xp'] }}<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>Gold gained: </b>{{ char['gold'] }}<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>Final HP: </b>{{ char['final_hp'] }}<br>
+                {% if char['drops'] %}
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>Drops: </b><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <b>Gold: </b>{{ char['gold'] }}<br>
+                {% for item in char['drops'] %}
+                    {% set i = Item.get_item_from_db(item['code']) %}
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <b>Item: </b>
+                    <a href="{{ url_for('main.item', id=i.id) }}">
+                        {{ i.name }}</a><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <b>Quantity: </b>{{ item['quantity'] }}<br>
+                {% endfor %}
+                {% endif %}
+
+    {% endfor %}
+{% endif %}
+
+{% if action_details['gathering'] %}
+<hr>
+    <b>XP gained: </b>{{ action_details['xp'] }}<br>
+    {% for i in action_details['items'] %}
+        <b>Item: </b>
+        {% set item = Item.get_item_from_db(i['code']) %}
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ i['quantity'] }}<br>
+    {% endfor %}
+{% endif %}
+
+
+
+
+
+{% endif %}
+</div>
+{% endblock %}
+

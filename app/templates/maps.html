@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg py-0" data-bs-theme="light">
+<div class="container-fluid">
+    <ul class="navbar-nav">
+        
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('main.maps', layer='underground') }}">
+                Underground</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('main.maps', layer='overworld') }}">
+                Overworld</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('main.maps', layer='interior') }}">
+                Interior</a>
+        </li>
+    </ul>
+</div>
+</nav>
+
+
+<table>
+{% for y in y_coords %}
+<tr>
+{% for map in maps %}
+
+    {% if y == map.y %}
+    <td class="image-table-cell">
+        <img src="{{ url_for('static', filename=map.image_name) }}">
+
+        {% if map.content_type or map.transition_to %}
+
+        <div class="table-cell-text-left-top">{{ map.name }}<br>
+        {% if map.transition_to %}
+            Transition to:<br>
+            {{ map.transition_to.map_to.layer }}: ({{ map.transition_to.map_to.x }}, {{ map.transition_to.map_to.y }})<br>
+            {% if map.transition_to.conditions %}
+
+                {% for condition in map.transition_to.conditions %}
+                
+                {% if condition.operator == 'has_item' %}
+                    {% set item = Item.get_item_from_db(condition.code) %}
+                    Has item:
+                        <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+                {% elif condition.code == 'gold' %}
+                    Cost: Gold x{{ condition.value }}
+                {% elif condition.operator == 'cost' and condition.code != 'gold' %}
+                    Cost: 
+                    {% set item = Item.get_item_from_db(condition.code) %}
+                        <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+                {% endif %}
+
+                {% endfor %}
+
+            {% endif %}
+        {% endif %}
+        </div>
+        <div class="table-cell-text-right-top">({{ map.x }}, {{ map.y }})<br></div>
+
+        <div class="table-cell-text-center-bottom">
+        {% if map.content_type %}
+        {{ map.content_type }}<br>
+
+        {% if map.monster %}
+            <a href="{{ url_for('main.monster', id=map.monster.id) }}">{{ map.monster.name }}</a>
+        {% elif map.resource %}
+            <a href="{{ url_for('main.resource', id=map.resource.id) }}">{{ map.resource.name }}</a>
+        {% elif map.npc %}
+            <a href="{{ url_for('main.npc', id=map.npc.id) }}">{{ map.npc.name }}</a>
+        {% else %}
+            {{ map.content_code }}
+        {% endif %}
+        {% endif %}
+
+        {% endif %}
+
+        </div>
+        
+    </td>
+    {% endif %}
+{% endfor %}
+</tr>
+{% endfor %}
+</table>
+
+<br>
+
+<a href="{{ url_for('main.update_one_map') }}">Update one map</a>
+
+{% endblock %}

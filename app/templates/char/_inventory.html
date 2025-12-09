@@ -1,0 +1,51 @@
+<h4>Inventory</h4>
+
+<b>Inventory maximum capacity: </b>{{ character.inventory_max_items }}<br>
+<b>Items in inventory: </b>{{ number_of_items }}<br>
+<br>
+
+{% if inventory_form.equip.choices %}
+    <form method="POST">
+        {{ inventory_form.hidden_tag() }}
+        {{ inventory_form.equip.label }}
+        {{ inventory_form.equip }}
+        {{ inventory_form.equip_item.label }}
+        {{ inventory_form.equip_item }}
+        {{ inventory_form.equip_quantity.label }}
+        {{ inventory_form.equip_quantity }}
+        {{ inventory_form.equip_submit() }}
+    </form>
+    <br>
+{% endif %}
+
+{% if use_form.use_item.choices %}
+    <form method="POST">
+        {{ use_form.hidden_tag() }}
+        {{ use_form.use_item.label }}
+        {{ use_form.use_item }}
+        {{ use_form.use_quantity.label }}
+        {{ use_form.use_quantity }}
+        {{ use_form.use_submit() }}
+    </form>
+    <br>
+{% endif %}
+
+<table class="char-table">
+{% for item in character.inventory_items|sort(attribute='slot') %}
+    <tr>
+        {% if item.item %}
+        <td class="char-table">{{ item.slot }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=item.item.id) }}">
+                {{ item.item.name }}</a></td>
+        <td class="char-table">{{ item.quantity }}</td>
+
+        {% if item.item.can_equip %}
+        <td class="char-table"><a href="{{ url_for('char.equip_item', char_name=character.name, id=item.item.id) }}">
+        Equip</a></td>
+        {% endif %}
+
+        {% endif %}
+    </tr>       
+{% endfor %}
+</table>

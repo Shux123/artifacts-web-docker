@@ -1,0 +1,126 @@
+<div class="content-info-block">
+    <p>
+    <a class="content-info-block-link" href="{{ url_for("main.item", id=item.id) }}"><h4>{{ item.name }}</h4></a></p>
+    <p class="item-description">{{ item.description }}</p>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+        <b>Item code:</b> {{ item.code }}<br>
+        <b>Level:</b> {{ item.level }}<br>
+        <b>Type:</b> {{ item.item_type }}<br>
+        {% if item.subtype %}
+            <b>Subtype:</b> {{ item.subtype }}<br>
+        {% endif %}
+
+        {% if item.conditions %}
+            <b>Conditions:</b> 
+            {% for c in item.conditions %}
+                {{ c.code }}, {{ c.operator }}, {{ c.value }}
+            {% endfor %}<br>
+        {% endif %}
+
+        <b>Tradeable:</b> {{ item.tradeable }}<br>
+        {% if item.drop %}
+        <b>Monster drop:</b><br>
+        {% for drop in item.drop %}
+        &nbsp; &nbsp; <a href="{{ url_for('main.monster', id=drop.monster.id) }}">{{ drop.monster.name }}</a><br>
+        {% endfor %}
+        {% endif %}
+
+        {% if item.effects %}
+            <b>Effects:</b><br>
+            <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+        
+        {% if item.effects %}
+        {% for e in item.effects %}
+        <tr>
+            <td><a href="{{ url_for('main.effect', id=e.effect.id) }}">{{ e.effect.name }}</a></td>
+            <td>{{ e.value }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+        </tbody>
+        </table><br>
+        {% endif %}
+
+        {% if item.achievement %}
+            <b>Achievement</b> <a href="{{ url_for('main.achievement', id=item.achievement.id) }}">{{ item.achievement.name }}</a><br>
+        {% endif %}
+
+        {% if item.currencies %}
+        <b>Currency for:</b><br>
+        {% for currency in item.currencies %}
+        &nbsp;&nbsp;&nbsp;&nbsp; <a href="{{ url_for('main.item', id=currency.item.id) }}">{{ currency.item.name }}</a><br>
+        {% endfor %}
+        {% endif %}
+        {% if item.npc_item %}
+            <b>NPC selling:</b> <a href="{{ url_for('main.npc', id=item.npc_item.npc.id) }}">{{ item.npc_item.npc.name }}</a><br>
+        {% endif %}
+        {% if item.drops %}
+        {% for drop in item.drops %}
+            {% if drop.monster %}
+                <b>Monster drops:</b> <a href="{{ url_for('main.monster', id=drop.monster.id) }}">{{ drop.monster.name }}</a><br>
+            {% endif %}
+            {% for resource in drop.resources %}
+                <b>Resource:</b> <a href="{{ url_for('main.resource', id=resource.id) }}">{{ resource.name }}</a><br>
+            {% endfor %}
+        {% endfor %} 
+        {% endif %}
+        
+
+    </div>
+
+    <div class="col-md-5">
+    {% if item.craft_skill %}
+        <div class="item-craft"><b>Craft</b></div>
+        <b>Skill:</b> {{ item.craft_skill }}<br>
+        <b>Level:</b> {{ item.craft_level }}<br>
+        <b>Quantity:</b> {{ item.craft_quantity }}<br>
+        <b>Items:</b><br>
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Quantity</th>
+                    <th>In bank</th>
+                    <th>Can craft</th>
+                 </tr>
+            </thead>
+            <tbody>
+                {% for craft in item.craft_items %}
+                <tr>
+                    <td><a href="{{ url_for('main.item', id=craft.craft_item.id) }}">{{ craft.craft_item.name }}</a></td>
+                    <td>{{ craft.quantity }}</td>
+                    {% if craft.craft_item.item_in_bank %}
+                    <td>{{ craft.craft_item.item_in_bank[0].quantity }}</td>
+                    <td>{{ craft.craft_item.item_in_bank[0].quantity // craft.quantity }}</td>
+                    {% else %}
+                    <td>0</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table><br>
+    {% endif %}
+
+    {% if item.crafted_items %}
+    <b>Ingridient for:</b><br>
+    {% for craft in item.crafted_items %}
+    <a href="{{ url_for('main.item', id=craft.crafted_item.id) }}">{{ craft.crafted_item.name }}
+    </a>&ensp;level: {{ craft.crafted_item.level }}<br>
+    {% endfor %}
+    {% endif %}
+    <br>
+    </div>
+    </div>
+    </div>
+    
+</div>

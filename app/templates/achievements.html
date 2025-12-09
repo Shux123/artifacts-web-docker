@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+<div class="row">
+
+    <div class="col-md-5">
+        <b>Points: </b>
+        {{ character.my_achiev_points }}
+        <progress value="{{ character.my_achiev_points }}" max="{{ character.all_achiev_points }}">   
+        </progress>
+        {{ character.all_achiev_points }}
+    </div>
+
+    <div class="col-md-7">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.achievement_type.label }} {{ form.achievement_type }}
+            {{ form.completed.label }} {{ form.completed }}
+            {{ form.submit() }}
+        </form>
+    </div>
+
+</div>
+</div>
+
+    {% for achievement in achievements %}
+        {% include '_achievement.html' %}
+    {% endfor %}
+{% endblock %}

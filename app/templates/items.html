@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.levels.label }} {{ form.levels }}&nbsp;&nbsp;
+    {{ form.skill.label }} {{ form.skill }}&nbsp;&nbsp;
+    {{ form.category.label }} {{ form.category }}&nbsp;&nbsp;
+    {{ form.submit() }}
+</form>
+
+{% for item in items %}
+    {% include '_item.html' %}
+{% endfor %}
+{% endblock %}

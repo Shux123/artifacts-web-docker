@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-info-block">
+
+    <h4>Logs</h4>
+    {% for log in logs %}
+    
+        <b>Character: </b>
+        {% set character = Character.get_character_by_name(log['character']) %}
+        <a href="{{ url_for('char.get_char', char_name=character.name) }}">
+            {{ character.name }}</a><br>
+        <b>Type: </b>{{ log['type'] }}<br>
+        <b>Description: </b>{{ log['description'] }}<br>
+
+        {% if log['type'] == 'fight' %}
+            <b>Result: </b>{{ log['content']['fight']['result'] }}<br>
+            <b>Turns: </b>{{ log['content']['fight']['turns'] }}<br>
+            {% set monster = Monster.get_monster_from_db(log['content']['fight']['opponent']) %}
+            <b>Opponent: </b>
+            <a href="{{ url_for('main.monster', id=monster.id) }}">
+                {{ monster.name }}</a><br>
+
+            <details>
+                <summary>Open fight log</summary>
+                <p>
+                {% for l in log['content']['fight']['logs'] %}
+                {{ l }}<br>
+                {% endfor %}
+                </p>
+            </details>
+
+            {% for char in log['content']['fight']['characters'] %}
+                <b>Character: </b> 
+                    {% set character = Character.get_character_by_name(char['character_name']) %}
+                    <a href="{{ url_for('char.get_char', char_name=character.name) }}">
+                        {{ character.name }}</a><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>XP gained: </b>{{ char['xp'] }}<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>Gold gained: </b>{{ char['gold'] }}<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>Final HP: </b>{{ char['final_hp'] }}<br>
+                {% if char['drops'] %}
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <b>Drops: </b><br>
+                {% for item in char['drops'] %}
+                    {% set i = Item.get_item_from_db(item['code']) %}
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <b>Item: </b>
+                    <a href="{{ url_for('main.item', id=i.id) }}">
+                        {{ i.name }}</a><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <b>Quantity: </b>{{ item['quantity'] }}<br>
+                {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+
+        {% elif log['type'] == 'gathering' %}
+            <b>Skill: </b>{{ log['content']['gathering']['skill'] }}<br>
+            {% set resource = Resource.get_resource_from_db(log['content']['gathering']['resource']) %}
+            <b>Resource: </b>
+            <a href="{{ url_for('main.resource', id=resource.id) }}">
+                {{ resource.name }}</a><br>
+            <b>XP gained: </b>{{ log['content']['gathering']['xp_gained'] }}<br>
+            {% if log['content']['drops']['items'] %}
+            <b>Drops: </b><br>
+            {% for item in log['content']['drops']['items'] %}
+            {% set i = Item.get_item_from_db(item['code']) %}
+                &nbsp;&nbsp;&nbsp;&nbsp;<b>Item: </b>
+                <a href="{{ url_for('main.item', id=i.id) }}">
+                    {{ i.name }}</a><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<b>Quantity: </b>{{ item['quantity'] }}<br>
+            {% endfor %}
+            {% endif %}
+
+        {% elif log['type'] == 'rest' %}
+            <b>HP restored: </b>{{ log['content']['hp_restored'] }}<br>
+
+        {% elif log['type'] == 'use' %}
+            {% set i = Item.get_item_from_db(log['content']['item']) %}
+            <b>Item: </b>
+            <a href="{{ url_for('main.item', id=i.id) }}">
+                {{ i.name }}</a><br>
+            <b>Quantity: </b>{{ log['content']['quantity'] }}<br>
+
+        {% elif log['type'] in ['deposit_item', 'withdraw_item'] %}
+            {% for item in log['content']['items'] %}
+            {% set i = Item.get_item_from_db(item['code']) %}
+            <b>Item: </b>
+            <a href="{{ url_for('main.item', id=i.id) }}">
+                {{ i.name }}</a><br>
+            <b>Quantity: </b>{{ item['quantity'] }}<br>
+            {% endfor %}
+
+        {% elif log['type'] == 'movement' %}
+            <b>X: </b>{{ log['content']['map']['x'] }}, <b>Y: </b>{{ log['content']['map']['y'] }}<br>
+            <b>Layer: </b>{{ log['content']['map']['layer'] }}<br>
+            <b>Map name: </b>{{ log['content']['map']['name'] }}<br>
+        
+        {% elif log['type'] == 'transition' %}
+            <b>Destination: </b><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<b>X: </b>{{ log['content']['destination']['x'] }}, 
+                                    <b>Y: </b>{{ log['content']['destination']['y'] }}<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<b>Layer: </b>{{ log['content']['destination']['layer'] }}<br>
+        
+        {% elif log['type'] == 'crafting' %}
+            {% set i = Item.get_item_from_db(log['content']['item']) %}
+            <b>Item: </b>
+            <a href="{{ url_for('main.item', id=i.id) }}">
+                {{ i.name }}</a><br>
+            <b>Quantity: </b>{{ log['content']['quantity'] }}<br>
+            <b>Skill: </b>{{ log['content']['skill'] }}<br>
+            <b>XP gained: </b>{{ log['content']['xp_gained'] }}<br>
+
+        {% elif log['type'] == 'recycling' %}
+            {% set i = Item.get_item_from_db(log['content']['item']) %}
+            <b>Item: </b>
+            <a href="{{ url_for('main.item', id=i.id) }}">
+                {{ i.name }}</a><br>
+            <b>Quantity: </b>{{ log['content']['quantity'] }}<br>
+            {% if log['content']['drops']['items'] %}
+            <b>Drops: </b><br>
+            {% for item in log['content']['drops']['items'] %}
+                {% set i = Item.get_item_from_db(item['code']) %} 
+                &nbsp;&nbsp;&nbsp;&nbsp;<b>Item: </b>
+                <a href="{{ url_for('main.item', id=i.id) }}">
+                    {{ i.name }}</a><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<b>Quantity: </b>{{ item['quantity'] }}<br>
+            {% endfor %}
+            {% endif %}
+
+        {% elif log['type'] == 'task_completed' %}
+            <b>Rewards:</b><br>
+            {% for i in log['content']['rewards']['items'] %}
+                {% set item = Item.get_item_from_db(i['code']) %}
+                &nbsp;&nbsp;&nbsp;&nbsp;<b>Item: </b>
+                <a href="{{ url_for('main.item', id=item.id) }}">
+                    {{ item.name }}</a><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<b>Quantity: </b>{{ i['quantity'] }}<br>
+            {% endfor %}
+            &nbsp;&nbsp;&nbsp;&nbsp;<b>Gold: </b>{{ log['content']['rewards']['gold'] }}<br>
+
+        {% elif log['type'] in ['equip', 'unequip'] %}
+        {% set item = Item.get_item_from_db(log['content']['item']) %}
+        <b>Item: </b><a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a><br>
+        <b>Slot: </b> {{ log['content']['slot'] }}<br>
+
+        {% else %}
+            <b>Content: </b>{{ log['content'] }}<br>
+        {% endif %}
+        <b>Cooldown: </b>{{ log['cooldown'] }}<br>
+        <b>Created at: </b>{{ log['created_at'] }}<br>
+        
+    <hr>
+    {% endfor %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for event in events %}
+<div class="content-info-block">
+    {% if event['code'] %}
+    <h4><a class="content-info-block-link" href="{{ url_for('main.event', id=Event.get_event_from_db(event['code'])) }}">{{ event['name'] }}</a></h4>
+    {% else %}
+    <h4>{{ event['name'] }}</h4>
+    {% endif %}
+
+    {% if event['code'] %}
+    <div class="text-center">Time left: {{ event['time_left'] }}</div>
+    <b>Code: </b>{{ event['code'] }}<br>
+
+    {% if event['map']['interactions']['content']['type'] == 'monster' %}
+    {% set monster = Monster.get_monster_from_db(event['map']['interactions']['content']['code'])  %}
+        <b>Monster: </b> <a href="{{ url_for('main.monster', id=monster.id) }}">{{ monster.name }}</a><br>
+    {% elif event['map']['interactions']['content']['type'] == 'npc' %}
+    {% set npc_id = NPC.get_npc_from_db(event['map']['interactions']['content']['code'])  %}
+    {% set npc = NPC.query.get(npc_id)  %}
+        <b>NPC: </b> <a href="{{ url_for('main.npc', id=npc.id) }}">{{ npc.name }}</a><br>
+    {% elif event['map']['interactions']['content']['type'] == 'resource' %}
+    {% set resource = Resource.get_resource_from_db(event['map']['interactions']['content']['code'])  %}
+        <b>Resource: </b> <a href="{{ url_for('main.resource', id=resource.id) }}">{{ resource.name }}</a><br>
+    {% endif %}
+
+    <b>Map name: </b>{{ event['map']['name'] }}<br>
+    <b>Map: </b>x: {{ event['map']['x'] }}, y: {{ event['map']['y'] }}<br>
+    <b>Layer: </b>{{ event['map']['layer'] }}<br>
+    <b>Duration: </b>{{ event['duration']}}<br>
+    <b>Expiration: </b>{{ event['expiration']}}<br>
+    <b>Created at: </b>{{ event['created_at']}}<br>
+    {% endif %}
+
+</div>
+{% endfor %}
+{% endblock %}

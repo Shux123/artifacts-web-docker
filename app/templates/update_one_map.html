@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.x_coord.label }} {{ form.x_coord }}
+    {{ form.y_coord.label }} {{ form.y_coord }}
+    {{ form.layer.label }} {{ form.layer }}
+    {{ form.submit() }}
+</form>
+
+{% endblock %}

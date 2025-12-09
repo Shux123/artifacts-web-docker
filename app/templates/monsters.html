@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.levels.label }} {{ form.levels }}
+    {{ form.submit() }}
+</form>
+
+{% for monster in monsters %}
+    {% include '_monster.html' %}
+{% endfor %}
+{% endblock %}

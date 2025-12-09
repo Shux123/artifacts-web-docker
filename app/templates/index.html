@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="content-info-block">
+
+<h4>Running bots</h4>
+
+{% if data %}
+    {% for d in data %}
+        Character name: <a href="{{ url_for('char.get_char', char_name=d['char_name']) }}">
+            {{ d['char_name'] }}</a><br>
+        Chartacter status: {{ d['char_status'] }}
+
+        {% if d['item'] %}
+        {% set item = Item.get_item_from_db(d['item']) %}
+        <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}.</a>
+        {% elif d['monster'] %}
+        {% set monster = Monster.get_monster_from_db(d['monster']) %}
+        <a href="{{ url_for('main.monster', id=monster.id) }}">{{ monster.name }}.</a>
+        {% elif d['resource'] %}
+        {% set resource = Resource.get_resource_from_db(d['resource']) %}
+        <a href="{{ url_for('main.resource', id=resource.id) }}">{{ resource.name }}.</a>
+        {% endif %}
+        
+        <br>
+        <a href="{{ url_for('char.stop_bot', char_name=d['char_name']) }}">Stop Bot</a>
+        <hr>
+    {% endfor %}
+{% else %}
+Noone bot is running now.
+{% endif %}
+
+</div>
+
+{% endblock %}

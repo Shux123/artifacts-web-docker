@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+
+<nav class="navbar navbar-expand-lg py-0">
+<ul class="navbar-nav">
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.my_ge_orders', char_name=character.name) }}">
+        My GE orders</a></li>
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.my_ge_hystory', char_name=character.name) }}">
+        My GE hystory</a></li>
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.item_ge_hystory', char_name=character.name) }}">
+        Item GE hystory</a></li>
+    </ul>
+</nav>
+
+    <hr>
+
+    <form method="POST">
+        {{ item_hystory_form.hidden_tag() }}
+        {{ item_hystory_form.item_ge.label }} {{ item_hystory_form.item_ge }}
+        {{ item_hystory_form.ge_submit() }}
+    </form>
+
+    {% if ge_orders %}
+    {% for order in ge_orders %}
+        <hr>
+        <b>Seller: </b>{{ order['seller'] }}<br>
+        <b>Buyer: </b>{{ order['buyer'] }}<br>
+        {% set item = Item.get_item_from_db(order['code']) %}
+        <b>Item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ order['quantity'] }}<br>
+        <b>Price: </b>{{ order['price'] }}<br>
+        <b>Total price: </b> {{ order['quantity'] * order['price'] }}<br>
+        <b>Sold at: </b>{{ order['sold_at'] }}<br>
+    {% endfor %}
+    {% endif %}
+
+
+</div>
+
+{% endblock %}
+

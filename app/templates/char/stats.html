@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+    <h4>Stats</h4>
+
+<div class="container-fluid">
+    <div class="row">
+
+    <div class="col-md-5">
+
+    <table class="char-table">
+        <tr>
+            <td class="char-table"><b>Speed:</b></td>
+            <td class="char-table">{{ character.speed }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('haste')) }}">Haste</a>
+            </td>
+            <td class="char-table">{{ character.haste }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('critical_strike')) }}">Critical strike</a>
+            </td>
+            <td class="char-table">{{ character.critical_strike }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('wisdom')) }}">Wisdom</a>
+            </td>
+            <td class="char-table">{{ character.wisdom }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('prospecting')) }}">Prospecting</a>
+            </td>
+            <td class="char-table">{{ character.prospecting }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('initiative')) }}">initiative</a>
+            </td>
+            <td class="char-table">{{ character.initiative }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('threat')) }}">threat</a>
+            </td>
+            <td class="char-table">{{ character.threat }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('attack_fire')) }}">Attack fire</a>
+            </td>
+            <td class="char-table">{{ character.attack_fire }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('attack_earth')) }}">Attack earth</a>
+            </td>
+            <td class="char-table">{{ character.attack_earth }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('attack_water')) }}">Attack water</a>
+            </td>
+            <td class="char-table">{{ character.attack_water }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('attack_air')) }}">Attack air</a>
+            </td>
+            <td class="char-table">{{ character.attack_air }}</td>
+        </tr>
+        
+    </table>
+
+    </div>
+
+    <div class="col-md-5">
+
+    <table class="char-table">
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('dmg')) }}">Damage</a>
+            </td>
+            <td class="char-table">{{ character.dmg }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('dmg_fire')) }}">Damage fire</a>
+            </td>
+            <td class="char-table">{{ character.dmg_fire }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('dmg_earth')) }}">Damage earth</a>
+            </td>
+            <td class="char-table">{{ character.dmg_earth }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('dmg_water')) }}">Damage water</a>
+            </td>
+            <td class="char-table">{{ character.dmg_water }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('dmg_air')) }}">Damage air</a>
+            </td>
+            <td class="char-table">{{ character.dmg_air }}</td>
+        </tr>
+            <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('res_fire')) }}">Resist fire</a>
+            </td>
+            <td class="char-table">{{ character.res_fire }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('res_earth')) }}">Resist earth</a>
+            </td>
+            <td class="char-table">{{ character.res_earth }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('res_water')) }}">Resist water</a>
+            </td>
+            <td class="char-table">{{ character.res_water }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">
+                <a href="{{ url_for('main.effect', id=Effect.get_effect_from_db('res_air')) }}">Resist air</a>
+            </td>
+            <td class="char-table">{{ character.res_air }}</td>
+        </tr>
+
+    </table>
+
+    {% if character.effects %}
+    <table>
+        <tr>
+            <th>Effect</th>
+            <th>Value</th>
+        </tr>
+    {% for effect in character.effects %}
+        <tr>
+            <td>
+        <a href="{{ url_for('main.effect', id=effect.effect.id) }}">{{ effect.effect.name }}</a>
+        </td>
+        <td>
+        {{ effect.value }}<br>
+        </td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% endif %}
+
+    </div>
+
+    </div>
+</div>
+</div>
+
+{% endblock %}
+

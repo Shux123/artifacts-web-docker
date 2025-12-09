@@ -1,0 +1,46 @@
+<div class="content-info-block">
+    <p>
+    <a class="content-info-block-link" href="{{ url_for("main.resource", id=resource.id) }}"><h4>{{ resource.name }}</h4></a>
+    </p>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+        <b>Resource code:</b> {{ resource.code }}<br>
+        <b>Skill:</b> {{ resource.skill }}<br>
+        <b>Level:</b> {{ resource.level }}<br>
+
+        {% if resource.event %}
+            <b>Event:</b> <a href="{{ url_for('main.event', id=resource.event.id) }}">{{ resource.event.name }}</a> <br>
+        {% endif %}
+        
+        {% for map in resource.maps %}
+            <b>Map: </b>{{ map.name }}, x: {{ map.x }}, y: {{ map.y }}<br>
+            <b>Layer: </b>{{ map.layer }}<br>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-5">
+    <b>Drops:</b><br>
+    <table>
+        <thead>
+            <th>Item</th>
+            <th>Rate</th>
+            <th>Min quantity</th>
+            <th>Max quantity</th>
+        </thead>
+    {% for drop in resource.drops %}
+        <tr>
+            <td><a href="{{ url_for('main.item', id=drop.item.id) }}">{{ drop.item.name }}</a></td>
+            <td>{{ drop.rate }}</td>
+            <td>{{ drop.min_quantity }}</td>
+            <td>{{ drop.max_quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table><br>
+
+    </div>
+    </div>
+    </div>
+    
+</div>

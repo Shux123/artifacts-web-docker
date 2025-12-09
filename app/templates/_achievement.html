@@ -1,0 +1,30 @@
+
+<div class="content-info-block">
+    <h4><a class="content-info-block-link" href="{{ url_for('main.achievement', id=achievement.id) }}">{{ achievement.name }}</a></h4>
+    <div class="item-description">{{ achievement.description }}</div>
+    {% if achievement.completed %}
+        <div class="text-center"><b>Completed at: </b>{{ achievement.completed_at }}<br></div>
+    {% endif %}
+
+    {% if achievement.current < achievement.total %}
+    <div class="text-center">
+        {{ achievement.current }}
+            <progress value="{{ achievement.current }}" max="{{ achievement.total }}">   
+            </progress>
+        {{ achievement.total }}
+    </div>
+    {% endif %}
+
+    <b>Points: </b>{{ achievement.points }}<br>
+    <b>Type: </b>{{ achievement.achiev_type }}<br>
+
+    {% if achievement.monster %}
+        <b>Target: </b>
+        <a href="{{ url_for('main.monster', id=achievement.monster.id) }}">{{ achievement.monster.name }}</a><br>
+    {% elif achievement.item %}
+        <b>Target: </b>
+        <a href="{{ url_for('main.item', id=achievement.item.id) }}">{{ achievement.item.name }}</a><br>
+    {% endif %}
+
+    <b>Reward gold: </b>{{ achievement.gold_reward }}<br>
+</div>

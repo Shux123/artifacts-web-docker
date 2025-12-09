@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+    <h4>Buy order</h4>
+    
+    <form method="POST">
+        {{ buy_ge_form.hidden_tag() }}
+        {{ buy_ge_form.ge_quantity.label }} {{ buy_ge_form.ge_quantity }}
+        {{ buy_ge_form.ge_submit() }}
+    </form>
+    <br>
+    <br>
+
+        <b>Seller: </b>{{ order['seller'] }}<br>
+        {% set item = Item.get_item_from_db(order['code']) %}
+        <b>Item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ order['quantity'] }}<br>
+        <b>Price: </b>{{ order['price'] }}<br>
+        <b>Total price: </b> {{ order['quantity'] * order['price'] }}<br>
+        <b>Created at: </b>{{ order['created_at'] }}<br>
+
+</div>
+
+{% endblock %}
+

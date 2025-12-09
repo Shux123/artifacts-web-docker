@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      - POSTGRES_DB=artifacts_db
+      - POSTGRES_USER=flask_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  web:
+    build: .
+    container_name: flask_celery
+    command: "gunicorn artifacts:flask_app --bind 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_CHAT_ID=${TELEGRAM_BOT_CHAT_ID}
+      - ARTIFACTS_TOKEN=${ARTIFACTS_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - TZ=Europe/Kyiv
+    volumes:
+      - map_images_data:/home/shux/app/static/images/maps
+    depends_on:
+      - redis
+      - db
+  worker:
+    build: ./
+    container_name: celery_worker
+    command: celery -A artifacts worker --loglevel=info
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_CHAT_ID=${TELEGRAM_BOT_CHAT_ID}
+      - ARTIFACTS_TOKEN=${ARTIFACTS_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - redis
+      - web
+      - db
+
+volumes:
+  postgres_data:
+  map_images_data:

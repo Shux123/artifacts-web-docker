@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+
+<div class="container-fluid">
+<div class="row">
+
+    <div class="col-md-5">
+
+    <form method="POST">
+        {{ move_form.hidden_tag() }}
+        Map: {{ move_form.x_coord.label }} {{ move_form.x_coord }}
+        {{ move_form.y_coord.label }} {{ move_form.y_coord }}<br>
+        {{ move_form.layer.label }} {{ move_form.layer }}
+        {{ move_form.submit() }}
+    </form>
+    {% if character %}
+    {% if character.map.transition_to %}
+    <nav class="navbar py-0" data-bs-theme="light">
+        <div class="container-fluid">
+        <ul class="navbar-nav">
+        
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('char.transition', char_name=character.name) }}">
+                    Transition to {{ character.map.transition_to.map_to.layer }}</a> 
+            </li>      
+        </ul>
+        </div>
+    </nav>
+        {% if character.map.transition_to.condition.operator == 'has_item' %}
+            {% set item = Item.get_item_from_db(character.map.transition_to.condition.code) %}
+            Has item:
+                <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+        {% elif character.map.transition_to.condition.code == 'gold' %}
+            Cost: Gold x{{ character.map.transition_to.condition.value }}
+        {% elif character.map.transition_to.condition.operator == 'cost' and character.map.transition_to.condition.code != 'gold' %}
+            Cost: 
+            {% set item = Item.get_item_from_db(character.map.transition_to.condition.code) %}
+                <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+        {% endif %}
+
+    {% endif %}
+    {% endif %}
+
+    </div>
+
+    <div class="col-md-4">
+
+        {% if character.map %}
+        <b>Map name: </b>{{ character.map.name }}<br>
+        <b>Layer: </b>{{ character.map.layer }}<br>
+        {% if character.map.content_type %}
+        <b>Content: </b>{{ character.map.content_type }}<br>
+
+        {% if character.map.monster %}
+        <b>Monster: </b>
+            <a href="{{ url_for('main.monster', id=character.map.monster.id) }}">{{ character.map.monster.name }}</a>
+        {% elif character.map.resource %}
+        <b>Resource: </b>
+            <a href="{{ url_for('main.resource', id=character.map.resource.id) }}">{{ character.map.resource.name }}</a>
+        {% elif character.map.npc %}
+        <b>NPC: </b>
+            <a href="{{ url_for('main.npc', id=character.map.npc.id) }}">{{ character.map.npc.name }}</a>
+        {% else %}
+            <b>Code: </b>{{ character.map.content_code }}
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+    </div>
+
+        <div class="col-md-3">
+        {% if character.map %}
+        <img width="145" src="{{ url_for('static', filename=character.map.image_name) }}">
+        {% endif %}
+    </div>
+
+</div>
+</div>
+
+
+{% if character %}
+{% if action_details['canceled_order'] %}
+<hr>
+    {% set item = Item.get_item_from_db(action_details['code']) %}
+        <b>Canceled item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ action_details['quantity'] }}<br>
+        <b>Price: </b>{{ action_details['price'] }}<br>
+        <b>Total price: </b> {{ action_details['total_price'] }}<br>
+{% endif %}
+
+{% if action_details['bought_order'] %}
+<hr>
+    {% set item = Item.get_item_from_db(action_details['code']) %}
+        <b>Bought item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ action_details['quantity'] }}<br>
+        <b>Price: </b>{{ action_details['price'] }}<br>
+        <b>Total price: </b> {{ action_details['total_price'] }}<br>
+{% endif %}
+
+{% if action_details['sell_order'] %}
+<hr>
+    {% set item = Item.get_item_from_db(action_details['code']) %}
+        <b>Created sell order.</b><br>
+        <b>Created at: </b>{{ action_details['created_at'] }}<br>
+        <b>Item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ action_details['quantity'] }}<br>
+        <b>Price: </b>{{ action_details['price'] }}<br>
+        <b>Total price: </b> {{ action_details['total_price'] }}<br>
+        <b>Tax: </b>{{ action_details['tax'] }}<br>
+{% endif %}
+
+{% if character.map.content_type == 'grand_exchange' %}
+
+<hr>
+<nav class="navbar navbar-expand-lg py-0">
+<ul class="navbar-nav">
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.my_ge_orders', char_name=character.name) }}">
+        My GE orders</a></li>
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.my_ge_hystory', char_name=character.name) }}">
+        My GE hystory</a></li>
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.item_ge_hystory', char_name=character.name) }}">
+        Item GE hystory</a></li>
+    </ul>
+</nav>
+
+<hr>
+    <form method="POST">
+        {{ sell_order_form.hidden_tag() }}
+        {{ sell_order_form.sell_item.label }} {{ sell_order_form.sell_item }}
+        {{ sell_order_form.sell_quantity.label }} {{ sell_order_form.sell_quantity }}
+        {{ sell_order_form.price.label }} {{ sell_order_form.price }}
+        {{ sell_order_form.sell_submit() }}
+    </form>
+    <br>
+    <b>Number of orders: </b>{{ character.total_ge_orders }}<br>
+    
+    {% for order in ge_orders %}
+    <hr>
+        <b>Seller: </b>{{ order['seller'] }}<br>
+        {% set item = Item.get_item_from_db(order['code']) %}
+        <b>Item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ order['quantity'] }}<br>
+        <b>Price: </b>{{ order['price'] }}<br>
+        <b>Total price: </b> {{ order['quantity'] *order['price'] }}<br>
+        <b>Created at: </b>{{ order['created_at'] }}<br>
+        {% if character.account == order['seller'] %}
+            <a href="{{ url_for('char.cancel_ge_order', char_name=character.name, id=order['id']) }}">
+                Cancel order</a><br>
+        {% else %}
+            <a href="{{ url_for('char.ge_order', char_name=character.name, id=order['id']) }}">
+                Buy this order</a><br>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+{% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+    <h4>Task</h4>
+    
+    {% if character.task_type == 'monsters' %}
+        <b>Monster: </b>
+        {% set monster = Monster.get_monster_from_db(character.task) %}
+            <a href="{{ url_for('main.monster', id=monster.id) }}">{{ monster.name }}</a><br>
+    {% elif character.task_type == 'items' %}
+        {% set item = Item.get_item_from_db(character.task) %}
+        <b>Item: </b>
+            <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a><br>
+    {% endif %}
+
+    <b>Task_type: </b>{{ character.task_type }}<br>
+    <b>Task_progress: </b>{{ character.task_progress }}<br>
+    <b>Task_total: </b>{{ character.task_total }}<br>
+</div>
+
+{% endblock %}
+

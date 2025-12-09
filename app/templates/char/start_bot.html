@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+    <h4>Start bot</h4>
+    
+    <form method="POST">
+        {{ start_bot_form.hidden_tag() }}
+        {{ start_bot_form.action.label }} {{ start_bot_form.action(onchange="updateChildChoices()") }}
+        {{ start_bot_form.target.label }}
+        <select name="{{ start_bot_form.target.name }}" id="target" required>
+            <option value="">Please select an Action first</option>
+        </select>
+        {{ start_bot_form.inventory_slot.label }} {{ start_bot_form.inventory_slot }}
+        {{ start_bot_form.submit() }}
+    </form>
+
+</div>
+
+{% endblock %}

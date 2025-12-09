@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content-info-block">
+
+    {% if message %}
+        <h4>{{ message }}</h4>
+    {% else %}
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.token.label }} {{ form.token }}
+            {{ form.submit() }}
+        </form>
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% for npc in npcs %}
+    {% include '_npc.html' %}
+{% endfor %}
+{% endblock %}

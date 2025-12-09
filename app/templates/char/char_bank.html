@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+
+    {% include '_bank.html' %}
+    <a href="{{ url_for('char.bank_buy_expansion', char_name=character.name) }}">Buy bank expansion</a>
+
+</div>
+{% endblock %}
+

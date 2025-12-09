@@ -1,0 +1,105 @@
+<div class="content-info-block">
+    <p>
+    <a class="content-info-block-link" href="{{ url_for("main.monster", id=monster.id) }}"><h4>{{ monster.name }}</h4></a>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+        <b>Monster code:</b> {{ monster.code }}<br>
+        <b>Level: </b> {{ monster.level }}<br>
+        <b>Type: </b> {{ monster.monster_type }}<br>
+        <b>HP:</b> {{ monster.hp }}<br>
+
+        {% if monster.achievement %}
+        <b>Achievement</b> <a href="{{ url_for('main.achievement', id=monster.achievement.id) }}">{{ monster.achievement.name }}</a><br>
+        {% endif %}
+
+        {% if monster.event %}
+            <b>Event:</b> <a href="{{ url_for('main.event', id=monster.event.id) }}">{{ monster.event.name }}</a> <br>
+        {% endif %}
+
+
+        <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Atack</th>
+                <th>Resist</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Fire</b></td>
+                <td>{{ monster.attack_fire }}</td>
+                <td>{{ monster.res_fire }}</td>
+            </tr>
+            <tr>
+                <td><b>Earth</b></td>
+                <td>{{ monster.attack_earth }}</td>
+                <td>{{ monster.res_earth }}</td>
+            </tr>
+            <tr>
+                <td><b>Water</b></td>
+                <td>{{ monster.attack_water }}</td>
+                <td>{{ monster.res_water }}</td>
+            </tr>
+            <tr>
+                <td><b>Air</b></td>
+                <td>{{ monster.attack_air }}</td>
+                <td>{{ monster.res_air }}</td>
+            </tr>
+        </tbody>
+        </table><br>
+        {% if monster.critical_strike %}
+            <b>Critical strike:</b> {{ monster.critical_strike }}<br>
+        {% endif %}
+        <b>Initiative:</b> {{ monster.initiative }}<br>
+        {% if monster.effects %}
+            <b>Effects:</b> 
+            {% for e in monster.effects %}
+                <a href="{{ url_for('main.effect', id=e.effect.id) }}">{{ e.effect.name }}</a> {{ e.value }}
+            {% endfor %}<br>
+        {% endif %}
+
+        {% for map in monster.maps %}
+            <b>Map: </b>{{ map.name }}, x: {{ map.x }}, y: {{ map.y }}<br>
+            <b>Layer: </b>{{ map.layer }}<br>
+        {% endfor %}
+
+    </div>
+
+    <div class="col-md-5">
+    <b>Drops:</b><br>
+    <table>
+        <thead>
+            <th>Item</th>
+            <th>Rate</th>
+            <th>Min quantity</th>
+            <th>Max quantity</th>
+        </thead>
+    {% for drop in monster.drops %}
+        <tr>
+            <td><a href="{{ url_for('main.item', id=drop.item.id) }}">{{ drop.item.name }}</a></td>
+            <td>{{ drop.rate }}</td>
+            <td>{{ drop.min_quantity }}</td>
+            <td>{{ drop.max_quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table><br>
+
+    <table>
+        <thead>
+            <th>Min gold</th>
+            <th>Max gold</th>
+        </thead>
+        <tbody>
+            <td>{{ monster.min_gold }}</td>
+            <td>{{ monster.max_gold }}</td>
+        </tbody>
+    </table><br>
+    
+    </div>
+    </div>
+    </div>
+    </p>
+</div>

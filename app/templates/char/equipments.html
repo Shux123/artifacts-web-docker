@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+    <h4>Equipments</h4>
+<table class="char-table">
+
+    <tr>
+        <td class="char-table"><b>Weapon:</b></td>
+        {% if character.equipment.weapon %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.weapon.id) }}">
+                {{ character.equipment.weapon.name }}</a></td>
+        <td class="char-table">{{ character.equipment.weapon.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.weapon.id, slot='weapon', quantity=1) }}">
+                Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+
+    <tr>
+        <td class="char-table"><b>Rune:</b></td>
+        {% if character.equipment.rune %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.rune.id) }}">
+                {{ character.equipment.rune.name }}</a></td>
+        <td class="char-table">{{ character.equipment.rune.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.rune.id, slot='rune', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Shield:</b></td>
+        {% if character.equipment.shield %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.shield.id) }}">
+                {{ character.equipment.shield.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.shield.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.shield.id, slot='shield', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Helmet:</b></td>
+        {% if character.equipment.helmet %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.helmet.id) }}">
+                {{ character.equipment.helmet.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.helmet.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.helmet.id, slot='helmet', quantity=1) }}">
+        Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Body armor:</b></td>
+        {% if character.equipment.body_armor %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.body_armor.id) }}">
+                {{ character.equipment.body_armor.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.body_armor.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.body_armor.id, slot='body_armor', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Leg armor:</b></td>
+        {% if character.equipment.leg_armor %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.leg_armor.id) }}">
+                {{ character.equipment.leg_armor.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.leg_armor.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.leg_armor.id, slot='leg_armor', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Boots:</b></td>
+        {% if character.equipment.boots %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.boots.id) }}">
+                {{ character.equipment.boots.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.boots.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.boots.id, slot='boots', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Ring 1:</b></td>
+        {% if character.equipment.ring1 %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.ring1.id) }}">
+                {{ character.equipment.ring1.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.ring1.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.ring1.id, slot='ring1', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Ring 2:</b></td>
+        {% if character.equipment.ring2 %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.ring2.id) }}">
+                {{ character.equipment.ring2.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.ring2.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.ring2.id, slot='ring2', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Amulet:</b></td>
+        {% if character.equipment.amulet %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.amulet.id) }}">
+                {{ character.equipment.amulet.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.amulet.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.amulet.id, slot='amulet', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Artifact 1:</b></td>
+        {% if character.equipment.artifact1 %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.artifact1.id) }}">
+                {{ character.equipment.artifact1.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.artifact1.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.artifact1.id, slot='artifact1', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Artifact 2:</b></td>
+        {% if character.equipment.artifact2 %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.artifact2.id) }}">
+                {{ character.equipment.artifact2.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.artifact2.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.artifact2.id, slot='artifact2', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Artifact 3:</b></td>
+        {% if character.equipment.artifact3 %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.artifact3.id) }}">
+                {{ character.equipment.artifact3.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.artifact3.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.artifact3.id, slot='artifact3', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Utility 1:</b></td>
+        {% if character.equipment.utility1 %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.utility1.id) }}">
+                {{ character.equipment.utility1.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.utility1.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.utility1.id, slot='utility1', quantity=character.equipment.utility1_slot_quantity) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Utility 1 quantity:</b></td>
+        {% if character.equipment.utility1 %}
+        <td class="char-table">{{ character.equipment.utility1_slot_quantity }}</td>
+        {% else %}
+        <td class="char-table">0</td>
+        {% endif %}
+
+    </tr>
+    <tr>
+        <td class="char-table"><b>Utility 2:</b></td>
+        {% if character.equipment.utility2 %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.utility2.id) }}">
+                {{ character.equipment.utility2.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.utility2.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.utility2.id, slot='utility2', quantity=character.equipment.utility2_slot_quantity) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table"> </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="char-table"><b>Utility 2 quantity:</b></td>
+        {% if character.equipment.utility2 %}
+        <td class="char-table">{{ character.equipment.utility2_slot_quantity }}</td>
+        {% else %}
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr>
+        <tr>
+        <td class="char-table"><b>Bag:</b></td>
+        {% if character.equipment.bag %}
+        <td class="char-table">
+            <a href="{{ url_for('main.item', id=character.equipment.bag.id) }}">
+                {{ character.equipment.bag.name }}</a>
+        </td>
+        <td class="char-table">{{ character.equipment.bag.level }}</td>
+        <td class="char-table">
+            <a href="{{ url_for('char.unequip_item', char_name=character.name, id=character.equipment.bag.id, slot='bag', quantity=1) }}">
+            Unequip</a></td>
+        {% else %}
+        <td class="char-table" </td>
+        <td class="char-table">0</td>
+        {% endif %}
+    </tr> 
+
+</table>
+</div>
+
+{% endblock %}
+

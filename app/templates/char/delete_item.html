@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+
+    <form method="POST">
+        {{ delete_item_form.hidden_tag() }}
+        {{ delete_item_form.del_item.label }} {{ delete_item_form.del_item }}
+        {{ delete_item_form.del_quantity.label }} {{ delete_item_form.del_quantity }}
+        {{ delete_item_form.dell_submit() }}
+    </form>
+
+    {% if action_details['delete_item'] %}
+    <hr>
+        {% set item = Item.get_item_from_db(action_details['code']) %}
+        <b>Deleted item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ action_details['quantity'] }}<br>
+    {% endif %}
+
+
+</div>
+
+{% endblock %}
+

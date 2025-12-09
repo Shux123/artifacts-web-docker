@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content-info-block">
+    <p>
+    <a class="content-info-block-link" href="{{ url_for("main.effect", id=effect.id) }}"><h4>{{ effect.name }}</h4></a>
+    </p>
+    <p class="item-description">{{ effect.description }}</p>
+
+        <b>Code:</b> {{ effect.code }}<br>
+        <b>Type:</b> {{ effect.effect_type }}<br>
+        <b>Subtype:</b> {{ effect.subtype }}<br>
+    
+</div>
+
+{% endblock %}

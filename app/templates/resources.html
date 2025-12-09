@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.skill.label }} {{ form.skill }}
+    {{ form.submit() }}
+</form>
+
+{% for resource in resources %}
+    {% include '_resource.html' %}
+{% endfor %}
+{% endblock %}

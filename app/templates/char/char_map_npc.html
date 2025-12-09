@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+
+<div class="container-fluid">
+<div class="row">
+
+    <div class="col-md-5">
+
+    <form method="POST">
+        {{ move_form.hidden_tag() }}
+        Map: {{ move_form.x_coord.label }} {{ move_form.x_coord }}
+        {{ move_form.y_coord.label }} {{ move_form.y_coord }}<br>
+        {{ move_form.layer.label }} {{ move_form.layer }}
+        {{ move_form.submit() }}
+    </form>
+    {% if character %}
+    {% if character.map.transition_to %}
+    <nav class="navbar py-0" data-bs-theme="light">
+        <div class="container-fluid">
+        <ul class="navbar-nav">
+        
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('char.transition', char_name=character.name) }}">
+                    Transition to {{ character.map.transition_to.map_to.layer }}</a> 
+            </li>      
+        </ul>
+        </div>
+    </nav>
+        {% if character.map.transition_to.condition.operator == 'has_item' %}
+            {% set item = Item.get_item_from_db(character.map.transition_to.condition.code) %}
+            Has item:
+                <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+        {% elif character.map.transition_to.condition.code == 'gold' %}
+            Cost: Gold x{{ character.map.transition_to.condition.value }}
+        {% elif character.map.transition_to.condition.operator == 'cost' and character.map.transition_to.condition.code != 'gold' %}
+            Cost: 
+            {% set item = Item.get_item_from_db(character.map.transition_to.condition.code) %}
+                <a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a>
+        {% endif %}
+
+    {% endif %}
+    {% endif %}
+
+    </div>
+
+    <div class="col-md-4">
+
+        {% if character.map %}
+        <b>Map name: </b>{{ character.map.name }}<br>
+        <b>Layer: </b>{{ character.map.layer }}<br>
+        {% if character.map.content_type %}
+        <b>Content: </b>{{ character.map.content_type }}<br>
+
+        {% if character.map.monster %}
+        <b>Monster: </b>
+            <a href="{{ url_for('main.monster', id=character.map.monster.id) }}">{{ character.map.monster.name }}</a>
+        {% elif character.map.resource %}
+        <b>Resource: </b>
+            <a href="{{ url_for('main.resource', id=character.map.resource.id) }}">{{ character.map.resource.name }}</a>
+        {% elif character.map.npc %}
+        <b>NPC: </b>
+            <a href="{{ url_for('main.npc', id=character.map.npc.id) }}">{{ character.map.npc.name }}</a>
+        {% else %}
+            <b>Code: </b>{{ character.map.content_code }}
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+    </div>
+
+        <div class="col-md-3">
+        {% if character.map %}
+        <img width="145" src="{{ url_for('static', filename=character.map.image_name) }}">
+        {% endif %}
+    </div>
+
+</div>
+</div>
+
+
+{% if character %}
+{% if character.map.npc %}
+<hr>
+    <b>NPC: </b>{{ character.map.npc.description }}<br>
+    <b>Items in shop:</b>
+    <table>
+        <thead>
+            <th>Item</th>
+            <th>Currency</th>
+            <th>Buy price</th>
+            <th>Sell price</th>
+        </thead>
+    {% for npc_item in character.map.npc.npc_items %}
+        <tr>
+            <td><a href="{{ url_for('main.item', id=npc_item.item.id) }}">{{ npc_item.item.name }}</a></td>
+
+            {% if npc_item.gold %}
+            <td>Gold</td>
+            {% else %}
+            <td><a href="{{ url_for('main.item', id=npc_item.currency.id) }}">{{ npc_item.currency.name }}</a></td>
+            {% endif %}
+
+
+            <td>{{ npc_item.buy_price }}</td>
+            <td>{{ npc_item.sell_price }}</td>
+        </tr>
+        {% endfor %}
+    </table><br>
+
+    <form method="POST">
+        {{ npc_form.hidden_tag() }}
+        {{ npc_form.buy_sell.label }} {{ npc_form.buy_sell }}
+        {{ npc_form.item.label }} {{ npc_form.item }}
+        {{ npc_form.quantity.label }} {{ npc_form.quantity }}
+        {{ npc_form.submit() }}
+    </form><br>
+
+{% if action_details['npc_buy_sell'] %}
+<hr>
+    {% set item = Item.get_item_from_db(action_details['code']) %}
+        <b>Item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ action_details['quantity'] }}<br>
+        <b>Currency: </b>{{ action_details['currency'] }}<br>
+        <b>Price: </b>{{ action_details['price'] }}<br>
+        <b>Total price: </b>{{ action_details['total_price'] }}<br>
+{% endif %}
+{% endif %}
+
+{% endif %}
+</div>
+{% endblock %}
+

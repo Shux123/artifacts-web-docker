@@ -1,0 +1,23 @@
+    <h4>Bank</h4>
+
+    <b>Gold:</b> {{ bank_ditails['gold'] }}<br>
+
+
+<table class="char-table">
+    {% set ns = namespace(counter=1) %}
+    {% for bank_item in bank_items %}
+    <tr>
+        <td class="char-table">{{ ns.counter }}:</td>
+        {% set ns.counter = ns.counter + 1 %}
+        <td class="char-table"><a href="{{ url_for('main.item', id=bank_item.item.id) }}">{{ bank_item.item.name }}</a> </td>
+        <td class="char-table">{{ bank_item.quantity }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+    <br>
+    <hr>
+    <b>Slots:</b> {{ bank_ditails['slots'] }}<br>
+    <b>Bank expansions:</b> {{ bank_ditails['expansions'] }}<br>
+    <b>Next expansion cost:</b> {{ bank_ditails['next_expansion_cost'] }}<br>

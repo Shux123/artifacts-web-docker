@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content-info-block">
+    <h4><a class="content-info-block-link" href="{{ url_for('main.event', id=event.id) }}">{{ event.name }}</a></h4>
+
+    <b>Code: </b>{{ event.code }}<br>
+    <b>Duration: </b>{{ event.duration }}<br>
+    <b>Type: </b>{{ event.content_type }}<br>
+
+    {% if event.monster %}
+        <b>Monster: </b> <a href="{{ url_for('main.monster', id=event.monster.id) }}">{{ event.monster.name }}</a><br>
+    {% elif event.npc %}
+        <b>NPC: </b> <a href="{{ url_for('main.npc', id=event.npc.id) }}">{{ event.npc.name }}</a><br>
+    {% elif event.resource %}
+        <b>Resource: </b> <a href="{{ url_for('main.resource', id=event.resource.id) }}">{{ event.resource.name }}</a><br>
+    {% endif %}
+    
+    
+    <b>Rate: </b>{{ event.rate }}<br>
+    <b>Map skin: </b>{{ event.map_skin }}<br>
+
+
+    {% for map in event.maps %}
+        <b>Map: </b>{{ map.name }}, x: {{ map.x }}, y: {{ map.y }}<br>
+        <b>Layer: </b>{{ map.layer }}<br>
+    {% endfor %}
+
+</div>
+    
+{% endblock %}

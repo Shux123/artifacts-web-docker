@@ -1,0 +1,91 @@
+<div class="container-fluid">
+<div class="row">
+
+<div class="col-md-2">
+    <a class="content-info-block-link" href="{{ url_for('char.get_char', char_name=character.name) }}">
+        <h4>{{ character.name }}</h4></a>
+</div>
+
+<div class="col-md-2">
+    Level: {{ character.level }}<br>
+    Gold: {{ character.gold }}
+</div>
+
+<div class="col-md-6">
+    <table class="char-table">
+        <tr>
+            <td class="char-table">HP: </td>
+            <td class="char-table">{{ character.hp }}</td>
+            <td class="char-table"><progress value="{{ character.hp }}" max="{{ character.max_hp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.max_hp }}</td>
+        </tr>
+        <tr>
+            <td class="char-table">XP:</td>
+            <td class="char-table">{{ character.xp }}</td>
+            <td class="char-table"><progress value="{{ character.xp }}" max="{{ character.max_xp }}">
+                    </progress></td>
+            <td class="char-table">{{ character.max_xp }}</td>
+        </tr>
+</table>
+
+</div>
+
+<div class="col-md-2">
+    <script type="text/javascript">
+        var timeleft = {{ cooldown | tojson }};
+    </script>
+    <h4 id="countdown"></h4>
+</div>
+
+
+
+<nav class="navbar navbar-expand-lg py-0" data-bs-theme="light">
+<div class="container-fluid">
+    <ul class="navbar-nav">
+        
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.rest', char_name=character.name) }}">
+                Rest</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.get_char', char_name=character.name) }}">
+                Map</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.get_char_skills', char_name=character.name) }}">
+                Skills</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.get_char_stats', char_name=character.name) }}">
+                Stats</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.get_equipments', char_name=character.name) }}">
+                Equipment</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.inventory', char_name=character.name) }}">
+                Inventory</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.get_task', char_name=character.name) }}">
+                Task</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.char_bank', char_name=character.name) }}">
+                Bank</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('char.start_bot', char_name=character.name) }}">
+                Start bot</a>
+        </li>
+
+
+    </ul>
+</div>
+</nav>
+
+</div>
+</div>
+
