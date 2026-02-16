@@ -5,7 +5,7 @@
 {% include 'char/_character_top.html' %}
 
 <div class="content-info-block">
-
+    
 <nav class="navbar navbar-expand-lg py-0">
     <ul class="navbar-nav">
     <li class="nav-item">
@@ -25,16 +25,10 @@
 
 <hr>
 
-
-    <h4>Buy order</h4>
+<b>Number of orders: </b>{{ character.total_ge_orders }}<br>
     
-    <form method="POST">
-        {{ buy_ge_form.hidden_tag() }}
-        {{ buy_ge_form.ge_quantity.label }} {{ buy_ge_form.ge_quantity }}
-        {{ buy_ge_form.ge_submit() }}
-    </form>
-    <br>
-
+    {% for order in ge_orders %}
+    <hr>
         <b>Seller: </b>{{ order['seller'] }}<br>
         {% set item = Item.get_item_from_db(order['code']) %}
         <b>Item: </b>
@@ -42,8 +36,16 @@
             {{ item.name }}</a><br>
         <b>Quantity: </b>{{ order['quantity'] }}<br>
         <b>Price: </b>{{ order['price'] }}<br>
-        <b>Total price: </b> {{ order['quantity'] * order['price'] }}<br>
+        <b>Total price: </b> {{ order['quantity'] *order['price'] }}<br>
         <b>Created at: </b>{{ order['created_at'] }}<br>
+        {% if character.account == order['seller'] %}
+            <a href="{{ url_for('char.cancel_ge_order', char_name=character.name, id=order['id']) }}">
+                Cancel order</a><br>
+        {% else %}
+            <a href="{{ url_for('char.ge_order', char_name=character.name, id=order['id']) }}">
+                Buy this order</a><br>
+        {% endif %}
+    {% endfor %}
 
 </div>
 

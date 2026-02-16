@@ -892,13 +892,13 @@ class Character(db.Model):
                 inv_slot_model.quantity = incoming_quantity
 
         effect_codes = [e['code'] for e in c['effects']]
-        my_effects = []
+        my_effects = {}
         if character.effects:
             for e in character.effects:
                 if e.effect.code not in effect_codes:
                     db.session.delete(e)
                 else:
-                    my_effects.append(e.effect.code)
+                    my_effects[e.effect.code] = e.value
         if c['effects'] != []:
             for e in c['effects']:
                 if e['code'] not in my_effects:
@@ -909,6 +909,14 @@ class Character(db.Model):
                             value = e['value'],
                             )
                     db.session.add(effect_value)
+                else:
+                    if e['value'] != my_effects[e['code']]:
+                        effect = Effect.query.filter_by(code=e['code']).first()
+                        effect_value = EffectValue.query.filter_by(
+                            character_id = character.id,
+                            effect_id = effect.id,
+                        ).first()
+                        effect_value.value = e['value']
 
         db.session.commit()
 
@@ -927,7 +935,7 @@ class Item(db.Model):
     __tablename__ = 'items'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
-    code = db.Column(db.String(64), nullable=False)
+    code = db.Column(db.String(64), nullable=False, unique=True, index=True)
     level = db.Column(db.Integer)
     item_type = db.Column(db.String(64))
     subtype = db.Column(db.String(64))

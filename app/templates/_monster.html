@@ -73,14 +73,14 @@
     <table>
         <thead>
             <th>Item</th>
-            <th>Rate</th>
+            <th>Rate %</th>
             <th>Min quantity</th>
             <th>Max quantity</th>
         </thead>
     {% for drop in monster.drops %}
         <tr>
             <td><a href="{{ url_for('main.item', id=drop.item.id) }}">{{ drop.item.name }}</a></td>
-            <td>{{ drop.rate }}</td>
+            <td>{{ 100 // drop.rate if 100 % drop.rate == 0 else '%.2f' | format(100 / drop.rate) }}</td>
             <td>{{ drop.min_quantity }}</td>
             <td>{{ drop.max_quantity }}</td>
         </tr>

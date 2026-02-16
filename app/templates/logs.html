@@ -147,6 +147,28 @@
         <b>Item: </b><a href="{{ url_for('main.item', id=item.id) }}">{{ item.name }}</a><br>
         <b>Slot: </b> {{ log['content']['slot'] }}<br>
 
+        {% elif log['type'] == 'new_task' %}
+            {% set i = Item.get_item_from_db(log['content']['task']) %}
+            <b>Task type: </b>{{ log['content']['task_type'] }}<br>
+            <b>Task item: </b>
+            <a href="{{ url_for('main.item', id=i.id) }}">
+                {{ i.name }}</a><br>
+            <b>Quantity: </b>{{ log['content']['task_total'] }}<br>
+
+        {% elif log['type'] == 'task_cancelled' %}
+            {% set i = Item.get_item_from_db(log['content']['price']['code']) %}
+            <b>Price: </b>
+            <a href="{{ url_for('main.item', id=i.id) }}">
+                {{ i.name }}</a><br>
+            <b>Quantity: </b>{{ log['content']['price']['quantity'] }}<br>
+
+        {% elif log['type'] == 'task_trade' %}
+            {% set i = Item.get_item_from_db(log['content']['item']) %}
+            <b>Item: </b>
+            <a href="{{ url_for('main.item', id=i.id) }}">
+                {{ i.name }}</a><br>
+            <b>Quantity: </b>{{ log['content']['quantity'] }}<br>
+
         {% else %}
             <b>Content: </b>{{ log['content'] }}<br>
         {% endif %}

@@ -80,17 +80,7 @@ def get_char(char_name):
         move_form.x_coord.data = character.x
         move_form.y_coord.data = character.y
         move_form.layer.data = character.layer
-
-    # NPC form
-   
-    # Bank form
-
-    # Craft form
-
-    # trade_task_form form
-
-    # ge
-            
+           
     cooldown = 0
     if character:
         cooldown = int(get_cooldown(character.cooldown_expiration))
@@ -108,19 +98,6 @@ def get_char(char_name):
                            action_details=action_details, Item=Item,
                            Monster=Monster,
                            Character=Character,
-                           # npc_form=npc_form, 
-                        #    deposit_form=deposit_form,
-                        #    withdraw_form=withdraw_form,
-                        #    bank_ditails=bank_ditails,
-                        #    bank_items=bank_items,
-                        #    number_of_items=number_of_items,
-                        #    crafting_form=crafting_form,
-                        #    recycling_form=recycling_form,
-                        #    inventory_form=inventory_form,
-                        #    use_form=use_form,
-                        #    trade_task_form=trade_task_form,
-                        #    ge_orders=ge_orders,
-                        #    sell_order_form=sell_order_form,
                            names=current_app.config['NAMES'])
 
 
@@ -573,37 +550,39 @@ def char_map_tasks_master(char_name):
     trade_task_form = TaskTrade()
     trade_choices = []
     if character:
-        if character.task_type == 'items':
+        if character.task_type == 'items':       
+            item_quantity = 0
             task_item = Item.query.filter_by(code=character.task).first()
             for item in character.inventory_items:
                 if item.item == task_item:
                     trade_choices = (task_item.code, task_item.name)
                     trade_task_form.trade_item.choices.append(trade_choices)
-                    trade_task_form.trade_quantity.data = item.quantity
-        if trade_task_form.validate_on_submit():
-            item_code = trade_task_form.trade_item.data
-            trade_quantity = trade_task_form.trade_quantity.data
-            item = Item.query.filter_by(code=item_code).first()
-            payload = {'code': item_code, 'quantity': trade_quantity}
-            response = char_action_request(char_name, 'task/trade', payload)
-            if response.status_code != 200:
-                flash(response.json()['error']['message'])
+                    item_quantity = item.quantity
+                    
+            if trade_task_form.validate_on_submit():
+                item_code = trade_task_form.trade_item.data
+                trade_quantity = trade_task_form.trade_quantity.data
+                task_item = Item.query.filter_by(code=item_code).first()
+                payload = {'code': item_code, 'quantity': trade_quantity}
+                response = char_action_request(char_name, 'task/trade', payload)
+                if response.status_code != 200:
+                    flash(response.json()['error']['message'])
+                    return redirect(url_for('char.get_char', char_name=char_name))
+                flash(f'{char_name} traded {trade_quantity} {task_item.name}.')
+                response = response.json()['data']
+                Character.update_character(response['character'])
+                response['trade']['task_trade'] = True
+                session['action_details'] = response['trade']
                 return redirect(url_for('char.get_char', char_name=char_name))
-            flash(f'{char_name} traded {trade_quantity} {item.name}.')
-            response = response.json()['data']
-            Character.update_character(response['character'])
-            response['trade']['task_trade'] = True
-            session['action_details'] = response['trade']
-            return redirect(url_for('char.get_char', char_name=char_name))
+            trade_task_form.trade_quantity.data = item_quantity
 
     cooldown = 0
     if character:
         cooldown = int(get_cooldown(character.cooldown_expiration))
-    if cooldown < 0:
-        cooldown = 0
-    if character is not None:
         move_form.x_coord.data = character.x
         move_form.y_coord.data = character.y
+    if cooldown < 0:
+        cooldown = 0
     if session.get('action_details'):
         action_details = session.pop('action_details')
     else:
@@ -644,17 +623,8 @@ def char_map_ge(char_name):
         move_form.y_coord.data = character.y
         move_form.layer.data = character.layer
 
-    ge_orders = None
     sell_order_form = None
     if character:
-        if character.map.content_type == 'grand_exchange':
-            ge_orders = get_data_for_db('grandexchange/orders')
-            total_ge_orders = 0
-            for order in ge_orders:
-                total_ge_orders += 1
-                created_at = get_local_time(order['created_at'])
-                order['created_at'] = created_at.strftime('%d-%m-%Y %H:%M')
-            character.total_ge_orders = total_ge_orders
 
         sell_order_form = CreateSellOrder()
         inventory_items_names = []
@@ -703,6 +673,32 @@ def char_map_ge(char_name):
                            move_form=move_form,
                            Item=Item,
                            sell_order_form=sell_order_form,
+                           names=current_app.config['NAMES'])
+
+
+@char.route('/<char_name>/ge_get_orders')
+def ge_get_orders(char_name):
+    character = Character.query.filter_by(name=char_name).first()
+
+    ge_orders = None
+    if character:
+        if character.map.content_type == 'grand_exchange':
+            ge_orders = get_data_for_db('grandexchange/orders')
+            total_ge_orders = 0
+            for order in ge_orders:
+                total_ge_orders += 1
+                created_at = get_local_time(order['created_at'])
+                order['created_at'] = created_at.strftime('%d-%m-%Y %H:%M')
+            character.total_ge_orders = total_ge_orders
+
+    cooldown = 0
+    if character:
+        cooldown = int(get_cooldown(character.cooldown_expiration))
+    if cooldown < 0:
+        cooldown = 0
+    return render_template('char/ge_get_orders.html', character=character,
+                           cooldown=cooldown,
+                           Item=Item,
                            ge_orders=ge_orders,
                            names=current_app.config['NAMES'])
 
@@ -828,6 +824,25 @@ def inventory(char_name):
 @char.route('/<char_name>/task')
 def get_task(char_name):
     character = Character.query.filter_by(name=char_name).first()
+
+    task_item_codes = ['copper_ore', 'ash_wood', 'sunflower', 'copper_bar',
+                       'small_health_potion', 'ash_plank', 'gudgeon',
+                       'cooked_gudgeon', 'iron_ore', 'spruce_wood', 'iron_bar',
+                       'spruce_plank', 'shrimp', 'cooked_shrimp', 'coal',
+                       'birch_wood', 'nettle_leaf', 'steel_bar',
+                       'hardwood_plank', 'trout', 'cooked_trout', 'gold_ore',
+                       'dead_wood', 'gold_bar', 'dead_wood_plank', 'bass',
+                       'cooked_bass', 'strange_ore', 'magic_wood',
+                       'strangold_bar', 'magical_plank', 'mithril_ore',
+                       'maple_wood', 'glowstem_leaf', 'mithril_bar',
+                       'maple_plank', 'salmon', 'cooked_salmon', 'swordfish',
+                       'palm_plank', 'cooked_swordfish', 'palm_wood',
+                       'adamantite_bar', 'adamantite_ore',
+                       'torch_cactus_flower']
+    
+    bank_items = db.session.query(BankItem).join(Item)\
+                    .filter(Item.code.in_(task_item_codes)).all()
+
     cooldown = 0
     if character:
         cooldown = int(get_cooldown(character.cooldown_expiration))
@@ -836,6 +851,7 @@ def get_task(char_name):
     return render_template('char/task.html', character=character,
                            Item=Item,
                            Monster=Monster,
+                           bank_items=bank_items,
                            cooldown=cooldown,
                            names=current_app.config['NAMES'])
 
@@ -1032,8 +1048,8 @@ def cancel_ge_order(char_name, id):
         return redirect(url_for('char.get_char', char_name=char_name))
 
 
-@char.route('/<char_name>/my_ge_orders')
-def my_ge_orders(char_name):
+@char.route('/<char_name>/ge_my_orders')
+def ge_my_orders(char_name):
     ge_orders = None
     character = Character.query.filter_by(name=char_name).first()
     if character:
@@ -1050,15 +1066,15 @@ def my_ge_orders(char_name):
         cooldown = int(get_cooldown(character.cooldown_expiration))
     if cooldown < 0:
         cooldown = 0
-    return render_template('char/my_ge_orders.html', character=character,
+    return render_template('char/ge_my_orders.html', character=character,
                            Item=Item,
                            cooldown=cooldown,
                            ge_orders=ge_orders,
                            names=current_app.config['NAMES'])
 
 
-@char.route('/<char_name>/my_ge_hystory')
-def my_ge_hystory(char_name):
+@char.route('/<char_name>/ge_my_hystory')
+def ge_my_hystory(char_name):
     ge_orders = None
     character = Character.query.filter_by(name=char_name).first()
     if character:
@@ -1072,15 +1088,15 @@ def my_ge_hystory(char_name):
         cooldown = int(get_cooldown(character.cooldown_expiration))
     if cooldown < 0:
         cooldown = 0
-    return render_template('char/my_ge_hystory.html', character=character,
+    return render_template('char/ge_my_hystory.html', character=character,
                            Item=Item,
                            cooldown=cooldown,
                            ge_orders=ge_orders,
                            names=current_app.config['NAMES'])
 
 
-@char.route('/<char_name>/item_ge_hystory', methods=['GET', 'POST'])
-def item_ge_hystory(char_name):
+@char.route('/<char_name>/ge_item_hystory', methods=['GET', 'POST'])
+def ge_item_hystory(char_name):
     ge_orders = None
     character = Character.query.filter_by(name=char_name).first()
     item_hystory_form = ItemGeHystory()
@@ -1102,7 +1118,7 @@ def item_ge_hystory(char_name):
         cooldown = int(get_cooldown(character.cooldown_expiration))
     if cooldown < 0:
         cooldown = 0
-    return render_template('char/item_ge_hystory.html', character=character,
+    return render_template('char/ge_item_hystory.html', character=character,
                            Item=Item,
                            cooldown=cooldown,
                            ge_orders=ge_orders,
@@ -1195,6 +1211,8 @@ def get_action_choices(action_category):
         monsters = Monster.query.all()
         for monster in monsters:
             choices.append((monster.code, monster.name))
+    elif action_category == 'tasks':
+        choices.append(('items', 'Items'))
     return jsonify(sorted(choices))
 
 
@@ -1218,7 +1236,7 @@ def start_bot(char_name):
             item = target
         elif action == 'fight':
             monster = target
-        else:
+        elif action == 'gather':
             resource = target
         task_status = {'task_id': task.id, 'char_status': '',
                        'char_name': char_name, 'stop': 'false',

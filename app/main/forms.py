@@ -66,7 +66,7 @@ class GetToken(FlaskForm):
 
 
 class CreateCharacter(FlaskForm):
-    skin_names = ['men1', 'men2', 'men3', 'women1', 'women2', 'women3']
+    skin_names = ['men1', 'men2', 'men3', 'women1', 'women2', 'women3', 'marauder1']
     name = StringField('Name', validators=[DataRequired()])
     skin = SelectField('Skin', choices=skin_names, validators=[DataRequired()])
     submit = SubmitField('Submit')

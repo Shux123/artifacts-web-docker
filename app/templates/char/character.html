@@ -123,7 +123,8 @@
     <b>Result: </b>{{ action_details['result'] }}<br>
     <b>Turns: </b>{{ action_details['turns'] }}<br>
     <b>Opponent: </b>
-        <a href="{{ url_for('main.monster', id=character.map.monster.id) }}">{{ character.map.monster.name }}</a><br>
+        {% set monster = Monster.get_monster_from_db(action_details['opponent']) %}
+        <a href="{{ url_for('main.monster', id=monster.id) }}">{{ monster.name }}</a><br>
 
     {% for char in action_details['characters'] %}
     

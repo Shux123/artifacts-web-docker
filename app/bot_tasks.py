@@ -7,6 +7,7 @@ from celery import shared_task
 from . import r
 from .models import Character, BankItem, Map, Item
 from .char_requests import char_action_request
+from sqlalchemy.orm import joinedload
 
 FISH = [{1: 'cooked_gudgeon', 'hp': 75},
         {10: 'cooked_shrimp', 'hp': 150},
@@ -24,6 +25,10 @@ to_diff_layer = {'mithril_rocks': 571,
                   'snowman': 1099,
                   'gingerbread': 1099,
                   'nutcracker': 1099,
+                  'adamantite_rocks': 1177,
+                  'dusk_beetle': 1177,
+                  'duskworm': 1177,
+                  'sandwhisper_empress': 1231,
                   }
 from_diff_layer = {'mithril_rocks': 572,
                   'bat': 572,
@@ -34,6 +39,10 @@ from_diff_layer = {'mithril_rocks': 572,
                   'snowman': 1216,
                   'gingerbread': 1216,
                   'nutcracker': 1216,
+                  'adamantite_rocks': 1178,
+                  'dusk_beetle': 1178,
+                  'duskworm': 1178,
+                  'sandwhisper_empress': 1233,
                   }
 
 
@@ -45,7 +54,7 @@ def bot(char_name, slot_number, action, target):
     # Get nearest bank to target
     banks = Map.query.filter_by(content_code='bank').all()
     if action != 'craft':
-        if target_map.name == 'Sandwhisper Isle':
+        if target_map.name in ['Sandwhisper Isle', 'Sandwhisper Mine', 'Empress House']:
             bank_map = banks[2]
         else:
             bank_map = banks[0]
@@ -57,7 +66,10 @@ def bot(char_name, slot_number, action, target):
                 bank_map = bank
 
     status = ''
-    status = f'{char_name} is {action}ing the '
+    if action == 'tasks':
+        status = f'{char_name} is performing tasks with items.'
+    else:
+        status = f'{char_name} is {action}ing the '
     message = f"✅ {char_name} bot has been started."
     asyncio.run(telegram_bot_send_message(message))
     r.hset(char_name, 'char_status' , status)
@@ -70,6 +82,8 @@ def bot(char_name, slot_number, action, target):
         target_map = Map.query.filter_by(content_code=item.craft_skill).first()
         bank_map = banks[0]
         crafting_loop(character, target, target_map, bank_map, slot_number)
+    elif action == 'tasks':
+        tasks_items_loop(character, target_map, bank_map, slot_number)
     
 
 def precise_sleep(expiration):
@@ -200,6 +214,9 @@ def fighting_loop(character, target_map, bank_map, slot_number):
         if target_map.content_code in to_diff_layer:
             map_id = to_diff_layer[target_map.content_code]
             move_transition(character, 'to', map_id)
+            if target_map.content_code == 'duskworm':
+                map_id = 1232
+                move_transition(character, 'to', map_id)
         move(character, target_map.map_id)
         if is_stop(char_name):
             break
@@ -210,6 +227,9 @@ def fighting_loop(character, target_map, bank_map, slot_number):
         if is_stop(char_name):
             break
         if target_map.content_code in from_diff_layer:
+            if target_map.content_code == 'duskworm':
+                map_id = 1238
+                move_transition(character, 'to', map_id)
             map_id = from_diff_layer.get(target_map.content_code)
             move_transition(character, 'from', map_id)
         move(character, bank_map.map_id)
@@ -386,7 +406,8 @@ def crafting_loop(character, target_code, target_map, bank_map, slot_number):
                                     'quantity': item.quantity*target_quantity})
         msg_text += f'    {item.craft_item.name}: {item.quantity*target_quantity}\n'
         withdraw_from_bank.append((item.craft_item.code, item.quantity*target_quantity))
-   
+    action = 'craft'
+        
     stop = False if r.hget(char_name, 'stop').decode('utf-8') == 'false' else True
 
     while not stop:
@@ -394,8 +415,8 @@ def crafting_loop(character, target_code, target_map, bank_map, slot_number):
             move(character, bank_map.map_id)
         if is_stop(char_name):
             break
-        withdraw_ingridiends_from_bank(
-                char_name, withdraw_bank_payload, msg_text, withdraw_from_bank)
+        withdraw_ingridiends_from_bank(char_name, action,
+                            withdraw_bank_payload, msg_text, withdraw_from_bank)
         if is_stop(char_name):
             break
         move(character, target_map.map_id)
@@ -414,10 +435,10 @@ def crafting_loop(character, target_code, target_map, bank_map, slot_number):
             break
 
 
-def withdraw_ingridiends_from_bank(char_name, payload, msg_text, withdraw_from_bank):
+def withdraw_ingridiends_from_bank(char_name, action, payload, msg_text, withdraw_from_bank):
     response = char_action_request(char_name, 'bank/withdraw/item', payload)
     if response.status_code == 200:
-        message = f'<b>{char_name}</b> withdraws ingridients for craft:\n{msg_text}'
+        message = f'<b>{char_name}</b> withdraws ingridients for {action}:\n{msg_text}'
         asyncio.run(telegram_bot_send_message(message))
         response = response_200(response)
         BankItem.update_bank('withdraw', withdraw_from_bank)
@@ -460,6 +481,88 @@ def recycle(char_name, target_code, target_quantity, target_name):
         asyncio.run(telegram_bot_send_message(response.json()['error']['message']))
 
 
+def tasks_items_loop(character, target_map, bank_map, slot_number):
+    char_name = character.name
+    if character.map != bank_map:
+        move(character, bank_map.map_id)
+    deposit_items_in_bank(character, slot_number)
+    number_inv_items = 0
+    for i in character.inventory_items:
+        number_inv_items += i.quantity
+    free_inv_space = character.inventory_max_items - number_inv_items - 5
+
+    action = 'tasks'
+    coins_payload = {'code': 'tasks_coin', 'quantity': 5}
+    msg_text_coins = '    Task coin: 5\n'
+    withdraw_coins_from_bank = [(coins_payload['code'], coins_payload['quantity'])]
+    withdraw_ingridiends_from_bank(char_name, action, [coins_payload],
+                                       msg_text_coins, withdraw_coins_from_bank)
+    move(character, target_map.map_id)
+    stop = is_stop(char_name)
+
+    while not stop:       
+        get_new_task(character, free_inv_space)
+        if is_stop(char_name):
+            break
+        move(character, bank_map.map_id)
+        if is_stop(char_name):
+            break
+        payload = {'code': character.task, 'quantity': character.task_total}
+        deposit_items_in_bank(character, slot_number)
+        if is_stop(char_name):
+            break
+
+        withdraw_from_bank = [(payload['code'], payload['quantity'])]
+        item = Item.query.filter_by(code=character.task).first()
+        msg_text = f'    {item.name}: {character.task_total}.'
+        withdraw_ingridiends_from_bank(char_name, action, [payload],
+                                       msg_text, withdraw_from_bank)
+        if is_stop(char_name):
+            break
+        withdraw_ingridiends_from_bank(char_name, action, [coins_payload],
+                                       msg_text_coins, withdraw_coins_from_bank)
+        if is_stop(char_name):
+            break
+        move(character, target_map.map_id)
+        if is_stop(char_name):
+            break
+        task_action(character, 'trade', payload)
+        if is_stop(char_name):
+            break
+        task_action(character, 'complete')
+        if is_stop(char_name):
+            break
+
+
+def get_new_task(character, free_inv_space):
+    is_error = task_action(character, 'new')
+    if is_error:
+        return
+    bank_item = BankItem.query.join(Item).filter(Item.code == character.task)\
+        .options(joinedload(BankItem.item)).first()
+    if free_inv_space < character.task_total\
+        or character.task_total > bank_item.quantity:
+        is_error = task_action(character, 'cancel')
+        if is_error:
+            return
+        get_new_task(character, free_inv_space)
+
+    
+def task_action(character, action, payload={}):
+    char_name = character.name
+    response = char_action_request(char_name, f'task/{action}', payload)
+    if response.status_code == 200:
+        response = response_200(response)
+    elif 'cooldown' in response.json()['error']['message']:
+        cooldown_in_response(response, char_name)
+        task_action(character, action, payload)
+    elif 'error' in response.json():
+        response = response.json()
+        error_in_responce(response, char_name)
+        r.hset(char_name, 'stop', 'true')
+        return True
+     
+
 def is_stop(char_name):
     stop = False if r.hget(
                         char_name, 'stop').decode('utf-8') == 'false' else True
@@ -470,7 +573,7 @@ def is_stop(char_name):
     else:
         return False
     
-
+ 
 def move_transition(character, direction, map_id):
     char_name = character.name
     if direction == 'to':

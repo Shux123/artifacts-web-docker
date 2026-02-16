@@ -45,11 +45,11 @@ class BankDeposit(FlaskForm):
 
 class BankWithdraw(FlaskForm):
     item_choise = [('gold', 'Gold')]
-    withdraw_item = SelectField('Withdrow',
+    withdraw_item = SelectField('Withdraw',
                        choices=item_choise, validators=[DataRequired()])
     withdraw_quantity = IntegerField('Quantity',
                             default=1, validators=[NumberRange(min=1, max=9999999)])
-    withdraw_submit = SubmitField('Withdrow')
+    withdraw_submit = SubmitField('Withdraw')
 
 
 class CraftingForm(FlaskForm):
@@ -119,7 +119,8 @@ class DeleteItem(FlaskForm):
 class StartBotForm(FlaskForm):
     action_choices = [('craft', 'Craft'),
                         ('fight', 'Fight'),
-                        ('gather', 'Gathering')]
+                        ('gather', 'Gathering'),
+                        ('tasks', 'Tasks')]
     action = SelectField('Action', choices=action_choices, validators=[DataRequired()])
     target = StringField('Target', validators=[DataRequired()])
     inventory_slot = IntegerField('Inv. Slot',

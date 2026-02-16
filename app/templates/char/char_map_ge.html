@@ -126,13 +126,16 @@
 <nav class="navbar navbar-expand-lg py-0">
 <ul class="navbar-nav">
     <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('char.my_ge_orders', char_name=character.name) }}">
+    <a class="nav-link" href="{{ url_for('char.ge_get_orders', char_name=character.name) }}">
+        Get all GE orders</a></li>
+    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('char.ge_my_orders', char_name=character.name) }}">
         My GE orders</a></li>
     <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('char.my_ge_hystory', char_name=character.name) }}">
+    <a class="nav-link" href="{{ url_for('char.ge_my_hystory', char_name=character.name) }}">
         My GE hystory</a></li>
     <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('char.item_ge_hystory', char_name=character.name) }}">
+    <a class="nav-link" href="{{ url_for('char.ge_item_hystory', char_name=character.name) }}">
         Item GE hystory</a></li>
     </ul>
 </nav>
@@ -146,27 +149,6 @@
         {{ sell_order_form.sell_submit() }}
     </form>
     <br>
-    <b>Number of orders: </b>{{ character.total_ge_orders }}<br>
-    
-    {% for order in ge_orders %}
-    <hr>
-        <b>Seller: </b>{{ order['seller'] }}<br>
-        {% set item = Item.get_item_from_db(order['code']) %}
-        <b>Item: </b>
-        <a href="{{ url_for('main.item', id=item.id) }}">
-            {{ item.name }}</a><br>
-        <b>Quantity: </b>{{ order['quantity'] }}<br>
-        <b>Price: </b>{{ order['price'] }}<br>
-        <b>Total price: </b> {{ order['quantity'] *order['price'] }}<br>
-        <b>Created at: </b>{{ order['created_at'] }}<br>
-        {% if character.account == order['seller'] %}
-            <a href="{{ url_for('char.cancel_ge_order', char_name=character.name, id=order['id']) }}">
-                Cancel order</a><br>
-        {% else %}
-            <a href="{{ url_for('char.ge_order', char_name=character.name, id=order['id']) }}">
-                Buy this order</a><br>
-        {% endif %}
-    {% endfor %}
 {% endif %}
 
 {% endif %}

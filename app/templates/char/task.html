@@ -20,6 +20,26 @@
     <b>Task_type: </b>{{ character.task_type }}<br>
     <b>Task_progress: </b>{{ character.task_progress }}<br>
     <b>Task_total: </b>{{ character.task_total }}<br>
+
+
+    <hr>
+
+    <h4>Quantity task items in bank</h4>
+
+    <table class="char-table">
+    {% set ns = namespace(counter=1) %}
+    {% for bank_item in bank_items %}
+    <tr>
+        <td class="char-table">{{ ns.counter }}:</td>
+        {% set ns.counter = ns.counter + 1 %}
+        <td class="char-table"><a href="{{ url_for('main.item', id=bank_item.item.id) }}">{{ bank_item.item.name }}</a> </td>
+        <td class="char-table">{{ bank_item.quantity }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+
 </div>
 
 {% endblock %}
