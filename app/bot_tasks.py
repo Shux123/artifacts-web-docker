@@ -9,82 +9,107 @@ from .models import Character, BankItem, Map, Item
 from .char_requests import char_action_request
 from sqlalchemy.orm import joinedload
 
-FISH = [{1: 'cooked_gudgeon', 'hp': 75},
-        {10: 'cooked_shrimp', 'hp': 150},
-        {20: 'cooked_trout', 'hp': 225},
-        {30: 'cooked_bass', 'hp': 300},
-        {40: 'cooked_salmon', 'hp': 400},
-        {50: 'cooked_swordfish', 'hp': 500}]
+COOCKED_FOOD = [
+    {"food": "cooked_desert_scorpion_meat", "hp": 800, "lvl": 50},
+    {"food": "fish_soup", "hp": 600, "lvl": 40},
+    {"food": "cooked_hellhound_meat", "hp": 600, "lvl": 40},
+    {"food": "maple_syrup", "hp": 500, "lvl": 40},
+    {"food": "cooked_swordfish", "hp": 500, "lvl": 50},
+    {"food": "cooked_rat_meat", "hp": 400, "lvl": 30},
+    {"food": "cooked_salmon", "hp": 400, "lvl": 40},
+    {"food": "apple_pie", "hp": 350, "lvl": 20},
+    {"food": "cooked_bass", "hp": 300, "lvl": 30},
+    {"food": "mushroom_soup", "hp": 240, "lvl": 15},
+    {"food": "cooked_trout", "hp": 225, "lvl": 20},
+    {"food": "cooked_wolf_meat", "hp": 200, "lvl": 15},
+    {"food": "cheese", "hp": 180, "lvl": 10},
+    {"food": "cooked_beef", "hp": 150, "lvl": 5},
+    {"food": "fried_eggs", "hp": 150, "lvl": 5},
+    {"food": "cooked_shrimp", "hp": 150, "lvl": 10},
+    {"food": "cooked_chicken", "hp": 80, "lvl": 1},
+    {"food": "cooked_gudgeon", "hp": 75, "lvl": 1},
+]
 
-to_diff_layer = {'mithril_rocks': 571,
-                  'bat': 571,
-                  'lich': 655,
-                  'cultist_alchemist': 934,
-                  'rosenblood': 934,
-                  'frost_slime': 1099,
-                  'snowman': 1099,
-                  'gingerbread': 1099,
-                  'nutcracker': 1099,
-                  'adamantite_rocks': 1177,
-                  'dusk_beetle': 1177,
-                  'duskworm': 1177,
-                  'sandwhisper_empress': 1231,
-                  }
-from_diff_layer = {'mithril_rocks': 572,
-                  'bat': 572,
-                  'lich': 656,
-                  'cultist_alchemist': 935,
-                  'rosenblood': 935,
-                  'frost_slime': 1216,
-                  'snowman': 1216,
-                  'gingerbread': 1216,
-                  'nutcracker': 1216,
-                  'adamantite_rocks': 1178,
-                  'dusk_beetle': 1178,
-                  'duskworm': 1178,
-                  'sandwhisper_empress': 1233,
-                  }
+to_diff_layer = {
+    "mithril_rocks": 571,
+    "bat": 571,
+    "lich": 655,
+    "cultist_alchemist": 934,
+    "rosenblood": 934,
+    "frost_slime": 1099,
+    "snowman": 1099,
+    "gingerbread": 1099,
+    "nutcracker": 1099,
+    "adamantite_rocks": 1177,
+    "dusk_beetle": 1177,
+    "duskworm": 1177,
+    "sandwhisper_empress": 1231,
+    "gold_rocks": 133,
+    "goblin_guard": 133,
+    "goblin_priestess": 133,
+    "rat": 874,
+}
+from_diff_layer = {
+    "mithril_rocks": 572,
+    "bat": 572,
+    "lich": 656,
+    "cultist_alchemist": 935,
+    "rosenblood": 935,
+    "frost_slime": 1216,
+    "snowman": 1216,
+    "gingerbread": 1216,
+    "nutcracker": 1216,
+    "adamantite_rocks": 1178,
+    "dusk_beetle": 1178,
+    "duskworm": 1178,
+    "sandwhisper_empress": 1233,
+    "gold_rocks": 134,
+    "goblin_guard": 134,
+    "goblin_priestess": 134,
+    "rat": 876,
+}
 
 
 @shared_task
 def bot(char_name, slot_number, action, target):
-    character = Character.query.filter_by(name=char_name).first()   
+    character = Character.query.filter_by(name=char_name).first()
     target_map = Map.query.filter_by(content_code=target).first()
 
     # Get nearest bank to target
-    banks = Map.query.filter_by(content_code='bank').all()
-    if action != 'craft':
-        if target_map.name in ['Sandwhisper Isle', 'Sandwhisper Mine', 'Empress House']:
+    banks = Map.query.filter_by(content_code="bank").all()
+    if action != "craft":
+        if target_map.name in ["Sandwhisper Isle", "Sandwhisper Mine", "Empress House"]:
             bank_map = banks[2]
         else:
             bank_map = banks[0]
         for bank in banks[:2]:
-            nearest_bank_distance = abs(bank_map.x - target_map.x) + \
-                abs(bank_map.y - target_map.y)
+            nearest_bank_distance = abs(bank_map.x - target_map.x) + abs(
+                bank_map.y - target_map.y
+            )
             bank_distance = abs(bank.x - target_map.x) + abs(bank.y - target_map.y)
-            if bank_distance < nearest_bank_distance: 
+            if bank_distance < nearest_bank_distance:
                 bank_map = bank
 
-    status = ''
-    if action == 'tasks':
-        status = f'{char_name} is performing tasks with items.'
+    status = ""
+    if action == "tasks":
+        status = f"{char_name} is performing tasks with items."
     else:
-        status = f'{char_name} is {action}ing the '
+        status = f"{char_name} is {action}ing the "
     message = f"✅ {char_name} bot has been started."
     asyncio.run(telegram_bot_send_message(message))
-    r.hset(char_name, 'char_status' , status)
-    if action == 'gather':
+    r.hset(char_name, "char_status", status)
+    if action == "gather":
         gathering_loop(character, target_map, bank_map, slot_number)
-    elif action == 'fight':
+    elif action == "fight":
         fighting_loop(character, target_map, bank_map, slot_number)
-    elif action == 'craft':
+    elif action == "craft":
         item = Item.query.filter_by(code=target).first()
         target_map = Map.query.filter_by(content_code=item.craft_skill).first()
         bank_map = banks[0]
         crafting_loop(character, target, target_map, bank_map, slot_number)
-    elif action == 'tasks':
+    elif action == "tasks":
         tasks_items_loop(character, target_map, bank_map, slot_number)
-    
+
 
 def precise_sleep(expiration):
     target_time = datetime.fromisoformat(expiration)
@@ -92,7 +117,7 @@ def precise_sleep(expiration):
     remaining_time = (target_time - datetime.now(timezone.utc)).total_seconds()
     if remaining_time <= 0:
         return
-    
+
     coarse_sleep_duration = remaining_time - 0.005
     if coarse_sleep_duration > 0:
         time.sleep(coarse_sleep_duration)
@@ -102,56 +127,61 @@ def precise_sleep(expiration):
 
 
 def response_200(response):
-    response = response.json()['data']
-    if 'character' in response:
-        Character.update_character(response['character'])
-    elif 'characters' in response:
-        for char in response['characters']:
+    response = response.json()["data"]
+    if "character" in response:
+        Character.update_character(response["character"])
+    elif "characters" in response:
+        for char in response["characters"]:
             Character.update_character(char)
-    expiration = response['cooldown']['expiration']
+    expiration = response["cooldown"]["expiration"]
     precise_sleep(expiration)
     return response
 
 
 def error_in_responce(response, char_name):
-    error_msg = response['error']['message']
-    error_msg = error_msg.replace('The character', char_name)
+    error_msg = response["error"]["message"]
+    error_msg = error_msg.replace("The character", char_name)
     message = f"Code {response['error']['code']}: {error_msg}"
-    asyncio.run(telegram_bot_send_message(f'<b>{char_name}</b>: {message}'))
-    
+    asyncio.run(telegram_bot_send_message(f"<b>{char_name}</b>: {message}"))
+
 
 def cooldown_in_response(response, char_name):
-    text = response.json()['error']['message']
-    seconds = re.findall(r'\d+.\d+', text)
+    text = response.json()["error"]["message"]
+    seconds = re.findall(r"\d+.\d+", text)
     time_now = datetime.now(timezone.utc)
-    message = f'<b>{char_name}</b> was on cooldown. He is waiting {seconds[0]} seconds.'
+    message = f"<b>{char_name}</b> was on cooldown. He is waiting {seconds[0]} seconds."
     asyncio.run(telegram_bot_send_message(message))
-    time_for_sleep = time_now+timedelta(seconds=float(seconds[0]),milliseconds=300)
+    time_for_sleep = time_now + timedelta(seconds=float(seconds[0]), milliseconds=300)
     precise_sleep(time_for_sleep.isoformat())
 
 
 def move(character, map_id):
     payload = {"map_id": map_id}
-    response = char_action_request(character.name, 'move', payload)
+    response = char_action_request(character.name, "move", payload)
     if response.status_code == 200:
-        if response.json()['data']['destination']['interactions']['content'] is not None:
-            destination = response.json()['data']['destination']['interactions']['content']['code']
-            message = f'<b>{character.name}</b> moved to {destination}'
+        if (
+            response.json()["data"]["destination"]["interactions"]["content"]
+            is not None
+        ):
+            destination = response.json()["data"]["destination"]["interactions"][
+                "content"
+            ]["code"]
+            message = f"<b>{character.name}</b> moved to {destination}"
             asyncio.run(telegram_bot_send_message(message))
         response = response_200(response)
 
-    elif 'cooldown' in response.json()['error']['message']:
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, character.name)
         move(character, map_id)
 
 
 def gathering_loop(character, target_map, bank_map, slot_number):
     char_name = character.name
-    stop = False if r.hget(char_name, 'stop').decode('utf-8') == 'false' else True
+    stop = False if r.hget(char_name, "stop").decode("utf-8") == "false" else True
     while not stop:
         if target_map.content_code in to_diff_layer:
             map_id = to_diff_layer[target_map.content_code]
-            move_transition(character, 'to', map_id)
+            move_transition(character, "to", map_id)
         move(character, target_map.map_id)
         if is_stop(char_name):
             break
@@ -160,50 +190,61 @@ def gathering_loop(character, target_map, bank_map, slot_number):
             break
         if target_map.content_code in from_diff_layer:
             map_id = from_diff_layer.get(target_map.content_code)
-            move_transition(character, 'from', map_id)
+            move_transition(character, "from", map_id)
         move(character, bank_map.map_id)
         if is_stop(char_name):
             break
         deposit_items_in_bank(character, slot_number)
         if is_stop(char_name):
             break
-       
+
+
 def gathering(character):
     char_name = character.name
-    message = f'<b>{char_name}</b> starts gathering resourses.'
+    message = f"<b>{char_name}</b> starts gathering resourses."
     asyncio.run(telegram_bot_send_message(message))
-    stop = False if r.hget(char_name, 'stop').decode('utf-8') == 'false' else True
+    stop = False if r.hget(char_name, "stop").decode("utf-8") == "false" else True
     while not stop:
-        response = char_action_request(char_name,'gathering')
+        response = char_action_request(char_name, "gathering")
         if response.status_code == 200:
             response = response_200(response)
-        elif 'cooldown' in response.json()['error']['message']:
+        elif "cooldown" in response.json()["error"]["message"]:
             cooldown_in_response(response, char_name)
             continue
-        elif 'error' in response.json():
-            if response.json()['error']['code'] == 598:
-                asyncio.run(telegram_bot_send_message(f'❗️ Resource event has been ended.'))
-                r.hset(char_name, 'stop', 'true')
+        elif "error" in response.json():
+            if response.json()["error"]["code"] == 598:
+                asyncio.run(
+                    telegram_bot_send_message(f"❗️ Resource event has been ended.")
+                )
+                r.hset(char_name, "stop", "true")
             else:
                 response = response.json()
                 error_in_responce(response, char_name)
                 break
-        stop = False if r.hget(
-                    char_name, 'stop').decode('utf-8') == 'false' else True
+        stop = False if r.hget(char_name, "stop").decode("utf-8") == "false" else True
 
 
 def fighting_loop(character, target_map, bank_map, slot_number):
     char_name = character.name
-    food, food_hp = '', 0
+    food, food_hp = "", 0
     lvl = character.level
-    food_level = 1 if not (lvl // 10 * 10) else lvl // 10 * 10
-    for f in FISH:
-        if f.get(food_level) is not None:
-            food = f.get(food_level)
-            food_hp = f.get('hp')
-    stop = False if r.hget(char_name, 'stop').decode('utf-8') == 'false' else True
+    for f in COOCKED_FOOD:
+        if f["lvl"] <= lvl:
+            bank_item = (
+                BankItem.query.join(Item)
+                .filter(Item.code == f["food"])
+                .options(joinedload(BankItem.item))
+                .first()
+            )
+            if bank_item and bank_item.quantity > character.inventory_max_items // 2:
+                food = f.get("food")
+                food_hp = f.get("hp")
+                break
+    if food == "":
+        asyncio.run(telegram_bot_send_message(f"❗️ There is no food in the bank."))
+        r.hset(char_name, "stop", "true")
 
-    while not stop:
+    while not is_stop(char_name):
         if character.map != bank_map:
             move(character, bank_map.map_id)
         if is_stop(char_name):
@@ -213,10 +254,13 @@ def fighting_loop(character, target_map, bank_map, slot_number):
             break
         if target_map.content_code in to_diff_layer:
             map_id = to_diff_layer[target_map.content_code]
-            move_transition(character, 'to', map_id)
-            if target_map.content_code == 'duskworm':
+            move_transition(character, "to", map_id)
+            if target_map.content_code == "duskworm":
                 map_id = 1232
-                move_transition(character, 'to', map_id)
+                move_transition(character, "to", map_id)
+            if target_map.content_code == "goblin_priestess":
+                map_id = 77
+                move_transition(character, "to", map_id)
         move(character, target_map.map_id)
         if is_stop(char_name):
             break
@@ -227,11 +271,14 @@ def fighting_loop(character, target_map, bank_map, slot_number):
         if is_stop(char_name):
             break
         if target_map.content_code in from_diff_layer:
-            if target_map.content_code == 'duskworm':
+            if target_map.content_code == "duskworm":
                 map_id = 1238
-                move_transition(character, 'to', map_id)
+                move_transition(character, "to", map_id)
+            if target_map.content_code == "goblin_priestess":
+                map_id = 71
+                move_transition(character, "to", map_id)
             map_id = from_diff_layer.get(target_map.content_code)
-            move_transition(character, 'from', map_id)
+            move_transition(character, "from", map_id)
         move(character, bank_map.map_id)
         if is_stop(char_name):
             break
@@ -242,98 +289,99 @@ def fighting_loop(character, target_map, bank_map, slot_number):
 
 def fight_use_rest(character, food, food_hp):
     char_name = character.name
-    message = f'<b>{char_name}</b> starts fighting.'
+    message = f"<b>{char_name}</b> starts fighting."
     asyncio.run(telegram_bot_send_message(message))
     if_rest = False
-    stop = False if r.hget(char_name, 'stop').decode('utf-8') == 'false' else True
+    stop = False if r.hget(char_name, "stop").decode("utf-8") == "false" else True
 
     while not stop:
         # Fight
         response = fight(character)
         char_hp, char_max_hp = 0, 0
-        if 'error' in response:
-            if response['error']['code'] == 598:
-                asyncio.run(telegram_bot_send_message(f'❗️ Monster event has been ended.'))
-                r.hset(char_name, 'stop', 'true')
+        if "error" in response:
+            if response["error"]["code"] == 598:
+                asyncio.run(
+                    telegram_bot_send_message(f"❗️ Monster event has been ended.")
+                )
+                r.hset(char_name, "stop", "true")
             else:
                 error_in_responce(response, char_name)
             break
         else:
-            for char in response['characters']:
-                if char['name'] == char_name:
-                    char_hp = char['hp']
-                    char_max_hp = char['max_hp']
+            for char in response["characters"]:
+                if char["name"] == char_name:
+                    char_hp = char["hp"]
+                    char_max_hp = char["max_hp"]
 
         # Use food
         if char_max_hp - char_hp > food_hp * 0.7:
             use_food_number = (char_max_hp - char_hp) // (food_hp * 0.7)
             response = use_food(char_name, food, use_food_number)
-            if 'error' in response:
+            if "error" in response:
                 error_in_responce(response, char_name)
                 response = rest(char_name)
                 break
             else:
-                char_hp = response['character']['hp']
-                char_max_hp = response['character']['max_hp']
+                char_hp = response["character"]["hp"]
+                char_max_hp = response["character"]["max_hp"]
                 if char_max_hp != char_hp:
                     if_rest = True
-        
+
         # rest
         if if_rest and char_hp < char_max_hp:
             response = rest(char_name)
-            if 'error' in response:
+            if "error" in response:
                 error_in_responce(response, char_name)
                 break
             else:
                 if_rest = False
-        stop = False if r.hget(
-                        char_name, 'stop').decode('utf-8') == 'false' else True
+        stop = False if r.hget(char_name, "stop").decode("utf-8") == "false" else True
 
 
 def fight(character):
     char_name = character.name
-    if character.map.monster.monster_type == 'boss':
+    if character.map.monster.monster_type == "boss":
         char_names = [char.name for char in character.map.characters]
         char_names.remove(char_name)
-        payload = {'participants': char_names}
-        response = char_action_request(char_name, 'fight', payload)
+        payload = {"participants": char_names}
+        response = char_action_request(char_name, "fight", payload)
     else:
-        response = char_action_request(char_name, 'fight')
+        response = char_action_request(char_name, "fight")
     if response.status_code == 200:
         response = response_200(response)
-        if response['fight']['result'] == 'loss':
-            message = f'❗️ <b>{char_name}</b> lost the fight.'
+        if response["fight"]["result"] == "loss":
+            message = f"❗️ <b>{char_name}</b> lost the fight."
             asyncio.run(telegram_bot_send_message(message))
-            r.hset(char_name, 'stop', 'true')
-    elif 'cooldown' in response.json()['error']['message']:
+            r.hset(char_name, "stop", "true")
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, char_name)
         response = fight(character)
-    elif 'error' in response.json():
+    elif "error" in response.json():
         response = response.json()
     return response
 
 
 def use_food(char_name, food, use_food_number):
-    payload = {'code': food, 'quantity': use_food_number}
-    response = char_action_request(char_name, 'use', payload)
+    payload = {"code": food, "quantity": use_food_number}
+    response = char_action_request(char_name, "use", payload)
     if response.status_code == 200:
         response = response_200(response)
-    elif 'cooldown' in response.json()['error']['message']:
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, char_name)
         response = use_food(char_name, food, use_food_number)
-    elif 'error' in response.json():
+    elif "error" in response.json():
         response = response.json()
     return response
 
 
 def rest(char_name):
-    response = char_action_request(char_name, 'rest')
+    response = char_action_request(char_name, "rest")
     if response.status_code == 200:
         response = response_200(response)
-    elif 'cooldown' in response.json()['error']['message']:
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, char_name)
         response = rest(char_name)
-    elif 'error' in response.json():
+    elif "error" in response.json():
         response = response.json()
     return response
 
@@ -341,23 +389,23 @@ def rest(char_name):
 def deposit_items_in_bank(character, slot_number):
     payload = []
     update_bank_items = []
-    item_text = ''
+    item_text = ""
     for item in character.inventory_items:
         if item.slot > slot_number:
             if item.item:
-                payload.append({'code': item.item.code, 'quantity': item.quantity})
-                item_text += f'    {item.item.name}: {item.quantity}\n'
+                payload.append({"code": item.item.code, "quantity": item.quantity})
+                item_text += f"    {item.item.name}: {item.quantity}\n"
                 update_bank_items.append((item.item.code, item.quantity))
-    response = char_action_request(character.name, 'bank/deposit/item', payload=payload)
+    response = char_action_request(character.name, "bank/deposit/item", payload=payload)
     if response.status_code == 200:
-        message = f'<b>{character.name}</b> deposits:\n{item_text}'
+        message = f"<b>{character.name}</b> deposits:\n{item_text}"
         asyncio.run(telegram_bot_send_message(message))
         response = response_200(response)
-        BankItem.update_bank('deposit', update_bank_items)
-    elif 'cooldown' in response.json()['error']['message']:
+        BankItem.update_bank("deposit", update_bank_items)
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, character.name)
         deposit_items_in_bank(character, slot_number)
-    
+
 
 def withdraw_food_from_bank(character, food):
     char_name = character.name
@@ -365,22 +413,28 @@ def withdraw_food_from_bank(character, food):
     for i in character.inventory_items:
         number_of_items += i.quantity
     food_quantity = int((character.inventory_max_items - number_of_items) / 2)
-    payload = [{'code': food, 'quantity': food_quantity}]
-    response = char_action_request(char_name, 'bank/withdraw/item', payload)
+    payload = [{"code": food, "quantity": food_quantity}]
+    response = char_action_request(char_name, "bank/withdraw/item", payload)
     if response.status_code == 200:
-        message = f'<b>{character.name}</b> withdraws {food_quantity} {food}'
+        message = f"<b>{character.name}</b> withdraws {food_quantity} {food}"
         asyncio.run(telegram_bot_send_message(message))
         response = response_200(response)
-        BankItem.update_bank('withdraw', [(food, food_quantity)])
-    elif 'cooldown' in response.json()['error']['message']:
+        BankItem.update_bank("withdraw", [(food, food_quantity)])
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, character.name)
         withdraw_food_from_bank(character, food)
-    elif 'error' in response.json():
-        if 'Missing required item' in response.json()['error']['message']:
-            asyncio.run(telegram_bot_send_message(f'❗️ There are no food {food} in bank.'))
-            r.hset(char_name, 'stop', 'true')
+    elif "error" in response.json():
+        if "Missing required item" in response.json()["error"]["message"]:
+            asyncio.run(
+                telegram_bot_send_message(f"❗️ There is no food {food} in the bank.")
+            )
+            r.hset(char_name, "stop", "true")
         else:
-            asyncio.run(telegram_bot_send_message(f'<b>{char_name}</b>: {response.json()['error']['message']}'))
+            asyncio.run(
+                telegram_bot_send_message(
+                    f"<b>{char_name}</b>: {response.json()['error']['message']}"
+                )
+            )
 
 
 def crafting_loop(character, target_code, target_map, bank_map, slot_number):
@@ -399,24 +453,28 @@ def crafting_loop(character, target_code, target_map, bank_map, slot_number):
     for item in target_item.craft_items:
         target_ingridients_number += item.quantity
     target_quantity = free_inv_space // target_ingridients_number
-    msg_text = ''
+    msg_text = ""
     withdraw_from_bank = []
     for item in target_item.craft_items:
-        withdraw_bank_payload.append({'code': item.craft_item.code,
-                                    'quantity': item.quantity*target_quantity})
-        msg_text += f'    {item.craft_item.name}: {item.quantity*target_quantity}\n'
-        withdraw_from_bank.append((item.craft_item.code, item.quantity*target_quantity))
-    action = 'craft'
-        
-    stop = False if r.hget(char_name, 'stop').decode('utf-8') == 'false' else True
+        withdraw_bank_payload.append(
+            {"code": item.craft_item.code, "quantity": item.quantity * target_quantity}
+        )
+        msg_text += f"    {item.craft_item.name}: {item.quantity*target_quantity}\n"
+        withdraw_from_bank.append(
+            (item.craft_item.code, item.quantity * target_quantity)
+        )
+    action = "craft"
+
+    stop = False if r.hget(char_name, "stop").decode("utf-8") == "false" else True
 
     while not stop:
         if character.map != bank_map:
             move(character, bank_map.map_id)
         if is_stop(char_name):
             break
-        withdraw_ingridiends_from_bank(char_name, action,
-                            withdraw_bank_payload, msg_text, withdraw_from_bank)
+        withdraw_ingridiends_from_bank(
+            char_name, action, withdraw_bank_payload, msg_text, withdraw_from_bank
+        )
         if is_stop(char_name):
             break
         move(character, target_map.map_id)
@@ -435,50 +493,56 @@ def crafting_loop(character, target_code, target_map, bank_map, slot_number):
             break
 
 
-def withdraw_ingridiends_from_bank(char_name, action, payload, msg_text, withdraw_from_bank):
-    response = char_action_request(char_name, 'bank/withdraw/item', payload)
+def withdraw_ingridiends_from_bank(
+    char_name, action, payload, msg_text, withdraw_from_bank
+):
+    response = char_action_request(char_name, "bank/withdraw/item", payload)
     if response.status_code == 200:
-        message = f'<b>{char_name}</b> withdraws ingridients for {action}:\n{msg_text}'
+        message = f"<b>{char_name}</b> withdraws ingridients for {action}:\n{msg_text}"
         asyncio.run(telegram_bot_send_message(message))
         response = response_200(response)
-        BankItem.update_bank('withdraw', withdraw_from_bank)
-    elif 'cooldown' in response.json()['error']['message']:
+        BankItem.update_bank("withdraw", withdraw_from_bank)
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, char_name)
         withdraw_ingridiends_from_bank(char_name, payload, msg_text, withdraw_from_bank)
-    elif 'error' in response.json():
-        if 'Missing required item' in response.json()['error']['message']:
-            asyncio.run(telegram_bot_send_message(f'❗️ There are not enough ingredients in the bank.'))
-            r.hset(char_name, 'stop', 'true')
+    elif "error" in response.json():
+        if "Missing required item" in response.json()["error"]["message"]:
+            asyncio.run(
+                telegram_bot_send_message(
+                    f"❗️ There are not enough ingredients in the bank."
+                )
+            )
+            r.hset(char_name, "stop", "true")
         else:
-            asyncio.run(telegram_bot_send_message(response.json()['error']['message']))
+            asyncio.run(telegram_bot_send_message(response.json()["error"]["message"]))
 
 
 def craft(char_name, target_code, target_quantity, target_name):
-    payload = {'code': target_code, 'quantity': target_quantity}
-    response = char_action_request(char_name, 'crafting', payload)
+    payload = {"code": target_code, "quantity": target_quantity}
+    response = char_action_request(char_name, "crafting", payload)
     if response.status_code == 200:
-        message = f'<b>{char_name}</b> crafts {target_quantity} {target_name}.'
+        message = f"<b>{char_name}</b> crafts {target_quantity} {target_name}."
         asyncio.run(telegram_bot_send_message(message))
         response = response_200(response)
-    elif 'cooldown' in response.json()['error']['message']:
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, char_name)
         craft(char_name, target_code, target_quantity, target_name)
-    elif 'error' in response.json():
-        asyncio.run(telegram_bot_send_message(response.json()['error']['message']))
+    elif "error" in response.json():
+        asyncio.run(telegram_bot_send_message(response.json()["error"]["message"]))
 
 
 def recycle(char_name, target_code, target_quantity, target_name):
-    payload = {'code': target_code, 'quantity': target_quantity}
-    response = char_action_request(char_name, 'recycling', payload)
+    payload = {"code": target_code, "quantity": target_quantity}
+    response = char_action_request(char_name, "recycling", payload)
     if response.status_code == 200:
-        message = f'<b>{char_name}</b> recycles {target_quantity} {target_name}.'
+        message = f"<b>{char_name}</b> recycles {target_quantity} {target_name}."
         asyncio.run(telegram_bot_send_message(message))
         response = response_200(response)
-    elif 'cooldown' in response.json()['error']['message']:
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, char_name)
         craft(char_name, target_code, target_quantity, target_name)
-    elif 'error' in response.json():
-        asyncio.run(telegram_bot_send_message(response.json()['error']['message']))
+    elif "error" in response.json():
+        asyncio.run(telegram_bot_send_message(response.json()["error"]["message"]))
 
 
 def tasks_items_loop(character, target_map, bank_map, slot_number):
@@ -491,104 +555,115 @@ def tasks_items_loop(character, target_map, bank_map, slot_number):
         number_inv_items += i.quantity
     free_inv_space = character.inventory_max_items - number_inv_items - 5
 
-    action = 'tasks'
-    coins_payload = {'code': 'tasks_coin', 'quantity': 5}
-    msg_text_coins = '    Task coin: 5\n'
-    withdraw_coins_from_bank = [(coins_payload['code'], coins_payload['quantity'])]
-    withdraw_ingridiends_from_bank(char_name, action, [coins_payload],
-                                       msg_text_coins, withdraw_coins_from_bank)
+    action = "tasks"
+    coins_payload = {"code": "tasks_coin", "quantity": 5}
+    msg_text_coins = "    Task coin: 5\n"
+    withdraw_coins_from_bank = [(coins_payload["code"], coins_payload["quantity"])]
+    withdraw_ingridiends_from_bank(
+        char_name, action, [coins_payload], msg_text_coins, withdraw_coins_from_bank
+    )
     move(character, target_map.map_id)
     stop = is_stop(char_name)
 
-    while not stop:       
+    while not stop:
         get_new_task(character, free_inv_space)
         if is_stop(char_name):
             break
         move(character, bank_map.map_id)
         if is_stop(char_name):
             break
-        payload = {'code': character.task, 'quantity': character.task_total}
+        payload = {"code": character.task, "quantity": character.task_total}
         deposit_items_in_bank(character, slot_number)
         if is_stop(char_name):
             break
 
-        withdraw_from_bank = [(payload['code'], payload['quantity'])]
+        withdraw_from_bank = [(payload["code"], payload["quantity"])]
         item = Item.query.filter_by(code=character.task).first()
-        msg_text = f'    {item.name}: {character.task_total}.'
-        withdraw_ingridiends_from_bank(char_name, action, [payload],
-                                       msg_text, withdraw_from_bank)
+        msg_text = f"    {item.name}: {character.task_total}."
+        withdraw_ingridiends_from_bank(
+            char_name, action, [payload], msg_text, withdraw_from_bank
+        )
         if is_stop(char_name):
             break
-        withdraw_ingridiends_from_bank(char_name, action, [coins_payload],
-                                       msg_text_coins, withdraw_coins_from_bank)
+        withdraw_ingridiends_from_bank(
+            char_name, action, [coins_payload], msg_text_coins, withdraw_coins_from_bank
+        )
         if is_stop(char_name):
             break
         move(character, target_map.map_id)
         if is_stop(char_name):
             break
-        task_action(character, 'trade', payload)
+        task_action(character, "trade", payload)
         if is_stop(char_name):
             break
-        task_action(character, 'complete')
+        task_action(character, "complete")
         if is_stop(char_name):
             break
 
 
 def get_new_task(character, free_inv_space):
-    is_error = task_action(character, 'new')
+    is_error = task_action(character, "new")
     if is_error:
         return
-    bank_item = BankItem.query.join(Item).filter(Item.code == character.task)\
-        .options(joinedload(BankItem.item)).first()
-    if free_inv_space < character.task_total\
-        or character.task_total > bank_item.quantity:
-        is_error = task_action(character, 'cancel')
+    bank_item = (
+        BankItem.query.join(Item)
+        .filter(Item.code == character.task)
+        .options(joinedload(BankItem.item))
+        .first()
+    )
+    if (
+        bank_item is None
+        or free_inv_space < character.task_total
+        or character.task_total > bank_item.quantity
+    ):
+        is_error = task_action(character, "cancel")
         if is_error:
             return
         get_new_task(character, free_inv_space)
 
-    
+
 def task_action(character, action, payload={}):
     char_name = character.name
-    response = char_action_request(char_name, f'task/{action}', payload)
+    response = char_action_request(char_name, f"task/{action}", payload)
     if response.status_code == 200:
         response = response_200(response)
-    elif 'cooldown' in response.json()['error']['message']:
+    elif "cooldown" in response.json()["error"]["message"]:
         cooldown_in_response(response, char_name)
         task_action(character, action, payload)
-    elif 'error' in response.json():
+    elif "error" in response.json():
         response = response.json()
         error_in_responce(response, char_name)
-        r.hset(char_name, 'stop', 'true')
+        r.hset(char_name, "stop", "true")
         return True
-     
+
 
 def is_stop(char_name):
-    stop = False if r.hget(
-                        char_name, 'stop').decode('utf-8') == 'false' else True
+    stop = False if r.hget(char_name, "stop").decode("utf-8") == "false" else True
     if stop:
-        asyncio.run(telegram_bot_send_message(f'🛑 <b>{char_name}</b> bot was stopped.'))
-        r.lrem('bots', 0, char_name)
+        asyncio.run(
+            telegram_bot_send_message(f"🛑 <b>{char_name}</b> bot was stopped.")
+        )
+        r.lrem("bots", 0, char_name)
         return True
     else:
         return False
-    
- 
+
+
 def move_transition(character, direction, map_id):
     char_name = character.name
-    if direction == 'to':
+    if direction == "to":
         move(character, map_id)
-        response = char_action_request(character.name, 'transition')
+        response = char_action_request(character.name, "transition")
         if response.status_code == 200:
             response = response_200(response)
-        elif 'cooldown' in response.json()['error']['message']:
+        elif "cooldown" in response.json()["error"]["message"]:
             cooldown_in_response(response, char_name)
-            char_action_request(character.name, 'transition')
-    if direction == 'from':
+            char_action_request(character.name, "transition")
+    if direction == "from":
         move(character, map_id)
-        response = char_action_request(character.name, 'transition')
+        response = char_action_request(character.name, "transition")
         if response.status_code == 200:
             response = response_200(response)
-        elif 'cooldown' in response.json()['error']['message']:
+        elif "cooldown" in response.json()["error"]["message"]:
             cooldown_in_response(response, char_name)
-            char_action_request(character.name, 'transition')
+            char_action_request(character.name, "transition")

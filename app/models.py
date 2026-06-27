@@ -121,6 +121,25 @@ class Event(db.Model):
         download_map_images(set(skins))
 
 
+class AchievementRewardItem(db.Model):
+    __tablename__ = 'achievement_reward_items'
+    id = db.Column(db.Integer, primary_key=True)
+    achievement_id = db.Column(db.Integer, db.ForeignKey('achievements.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    quantity = db.Column(db.Integer)
+
+
+class AchievementObjective(db.Model):
+    __tablename__ = 'achievement_objectives'
+    id = db.Column(db.Integer, primary_key=True)
+    achievement_id = db.Column(db.Integer, db.ForeignKey('achievements.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    monster_id = db.Column(db.Integer, db.ForeignKey('monsters.id'))
+    type = db.Column(db.String)
+    progress = db.Column(db.Integer)
+    total = db.Column(db.Integer)
+
+
 class Achievement(db.Model):
     __tablename__ = 'achievements'
     id = db.Column(db.Integer, primary_key=True)
@@ -128,12 +147,14 @@ class Achievement(db.Model):
     code = db.Column(db.String(64), nullable=False)
     description = db.Column(db.String, nullable=False)
     points = db.Column(db.Integer)
+    reward_gold = db.Column(db.Integer)
     achiev_type = db.Column(db.String)
-    target_item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
-    target_monster_id = db.Column(db.Integer, db.ForeignKey('monsters.id'))
-    total = db.Column(db.Integer)
-    current = db.Column(db.Integer)
-    gold_reward = db.Column(db.Integer)
+    reward_items = db.relationship('AchievementRewardItem', backref='achievement',
+                                   foreign_keys=[AchievementRewardItem.achievement_id],
+                                   lazy='select')
+    objectives = db.relationship('AchievementObjective', backref='achievement',
+                                foreign_keys=[AchievementObjective.achievement_id],
+                                   lazy='select')
     completed_at = db.Column(db.String)
     completed = db.Column(db.Boolean)
 
@@ -142,34 +163,47 @@ class Achievement(db.Model):
         from .all_requests import get_achievements
         achievements = get_achievements()
         for a in achievements['data']:
-            monster_id = None
-            item_id = None
             if a['completed_at'] is not None:
                 completed = True
             else:
                 completed = False
-            if a['type'] == 'combat_kill':
-                monster = Monster.query.filter_by(
-                    code=a['target']).first()
-                monster_id = monster.id
-            elif a['target'] is not None:
-                item = Item.query.filter_by(code=a['target']).first()
-                item_id = item.id
             achiev = Achievement(
                 name = a['name'],
                 code = a['code'],
                 description = a['description'],
                 points = a['points'],
-                achiev_type = a['type'],
-                target_monster_id = monster_id,
-                target_item_id = item_id,
-                total = a['total'],
-                current = a['current'],
-                gold_reward = a['rewards']['gold'],
+                reward_gold = a['rewards']['gold'],
+                achiev_type = a['objectives'][0]['type'],
                 completed_at = a['completed_at'],
                 completed = completed,
             )
             db.session.add(achiev)
+            for objective in a['objectives']:
+                monster_id = None
+                item_id = None
+                if objective['type'] == 'combat_kill':
+                    monster = Monster.query.filter_by(
+                        code=objective['target']).first()
+                    monster_id = monster.id
+                elif objective['target'] is not None:
+                    item = Item.query.filter_by(code=objective['target']).first()
+                    item_id = item.id
+                achievement_objective = AchievementObjective(
+                    achievement = achiev,
+                    type = objective['type'],
+                    monster_id = monster_id,
+                    item_id = item_id,
+                    progress = objective['progress'],
+                    total = objective['total'])
+                db.session.add(achievement_objective)
+            if a['rewards']['items'] is not None:
+                for r_item in a['rewards']['items']:
+                    item = Item.query.filter_by(code=r_item['code']).first()
+                    reward_item = AchievementRewardItem(
+                        achievement_id = achiev.id,
+                        item_id = item.id,
+                        quantity = r_item['quantity'])
+                    db.session.add(reward_item)
         character = Character.query.get(1)
         character.all_achiev_points = achievements['all_points']
         character.my_achiev_points = achievements['my_points']
@@ -184,11 +218,17 @@ class Achievement(db.Model):
             if a['completed_at'] is not None:
                 achiev.completed = True
                 achiev.completed_at = a['completed_at']
-            achiev.current = a['current']
+            for i, objective in enumerate(achiev.objectives):
+                objective.progress = a['objectives'][i]['progress']
         character = Character.query.get(1)
         character.my_achiev_points = achievements['my_points']
         character.all_achiev_points = achievements['all_points']
         db.session.commit()
+
+    @staticmethod
+    def get_achievement_from_db(achievement_name):
+        achievement = Achievement.query.filter_by(name=achievement_name).first()
+        return achievement
 
 
 drop_resource_links = db.Table('drop_resource_links',
@@ -258,8 +298,8 @@ class Monster(db.Model):
     drops = db.relationship('Drop',
                             foreign_keys=[Drop.monster_id],
                             backref='monster', lazy='select')
-    achievement = db.relationship('Achievement', uselist=False,
-                            foreign_keys=[Achievement.target_monster_id],
+    achievement_objective_monsters = db.relationship('AchievementObjective',
+                            foreign_keys=[AchievementObjective.monster_id],
                             backref='monster', lazy='select')
     event = db.relationship('Event', uselist=False,
                             foreign_keys=[Event.monster_id],
@@ -400,10 +440,11 @@ class Map(db.Model):
                 if m['interactions']['content'] is not None:
                     content_type = m['interactions']['content']['type']
                     content_code = m['interactions']['content']['code']
-                    if content_type == 'monster':
+                    if content_type == 'monster':                        
                         monster = Monster.query.filter_by(
                             code=content_code).first()
-                        monster_id = monster.id
+                        if monster is not None:
+                            monster_id = monster.id
                     elif content_type == 'npc':
                         npc = NPC.query.filter_by(
                             code=content_code).first()
@@ -963,8 +1004,11 @@ class Item(db.Model):
     npc_item = db.relationship('NPC_Item', uselist=False,
                            foreign_keys=[NPC_Item.item_id],
                            backref=db.backref('item', lazy='select'))
-    achievement = db.relationship('Achievement', uselist=False,
-                            foreign_keys=[Achievement.target_item_id],
+    achievement_reward_items = db.relationship('AchievementRewardItem',
+                            foreign_keys=[AchievementRewardItem.item_id],
+                            backref=db.backref('item', lazy='select'))
+    achievement_objective_items = db.relationship('AchievementObjective',
+                            foreign_keys=[AchievementObjective.item_id],
                             backref=db.backref('item', lazy='select'))
     currencies = db.relationship('NPC_Item',
                             foreign_keys=[NPC_Item.currency_id],

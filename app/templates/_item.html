@@ -51,9 +51,9 @@
         </table><br>
         {% endif %}
 
-        {% if item.achievement %}
-            <b>Achievement</b> <a href="{{ url_for('main.achievement', id=item.achievement.id) }}">{{ item.achievement.name }}</a><br>
-        {% endif %}
+        {% for i in item.achievement_objective_items %}
+            <b>Achievement: </b> <a href="{{ url_for('main.achievement', id=i.achievement.id) }}">{{ i.achievement.name }}</a><br>
+        {% endfor %}
 
         {% if item.currencies %}
         <b>Currency for:</b><br>

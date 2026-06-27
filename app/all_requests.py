@@ -1,6 +1,6 @@
 import os
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import tzlocal
 from flask import current_app
@@ -99,19 +99,21 @@ def get_active_events():
     url = "https://api.artifactsmmo.com/events/active"
     responce = requests.get(url, headers=headers)
     responce = responce.json()['data']
+    local_tz_name = tzlocal.get_localzone_name()
+    local_time_zone = ZoneInfo(local_tz_name)
     events = []
+    min_datetime = datetime(1, 1, 1)
     for event in responce:
         duration = timedelta(minutes=event['duration'])
-        event['duration'] = (datetime(1, 1, 1) + duration).strftime('%H:%M')
-        local_tz_name = tzlocal.get_localzone_name()
-        local_time_zone = ZoneInfo(local_tz_name)
+        event['duration'] = (min_datetime + duration).strftime('%H:%M')
         expiration_local = get_local_time(event['expiration'])
         created_local = get_local_time(event['created_at'])
         time_left = expiration_local - datetime.now(tz=local_time_zone)
         event['expiration'] = expiration_local.strftime('%H:%M')
         event['created_at'] = created_local.strftime('%H:%M')
-        event['time_left'] = (datetime(1, 1, 1) + time_left).strftime('%H:%M')
-        events.append(event)
+        if time_left.total_seconds() > 0:
+            event['time_left'] = (min_datetime + time_left).strftime('%H:%M')
+            events.append(event)
     return events
 
 def get_account_name():

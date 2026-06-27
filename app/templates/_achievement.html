@@ -4,27 +4,40 @@
     <div class="item-description">{{ achievement.description }}</div>
     {% if achievement.completed %}
         <div class="text-center"><b>Completed at: </b>{{ achievement.completed_at }}<br></div>
-    {% endif %}
-
-    {% if achievement.current < achievement.total %}
-    <div class="text-center">
-        {{ achievement.current }}
-            <progress value="{{ achievement.current }}" max="{{ achievement.total }}">   
-            </progress>
-        {{ achievement.total }}
-    </div>
-    {% endif %}
+    {% endif %}<br>
 
     <b>Points: </b>{{ achievement.points }}<br>
     <b>Type: </b>{{ achievement.achiev_type }}<br>
 
-    {% if achievement.monster %}
-        <b>Target: </b>
-        <a href="{{ url_for('main.monster', id=achievement.monster.id) }}">{{ achievement.monster.name }}</a><br>
-    {% elif achievement.item %}
-        <b>Target: </b>
-        <a href="{{ url_for('main.item', id=achievement.item.id) }}">{{ achievement.item.name }}</a><br>
-    {% endif %}
+    <table class="char-table">
+    {% for objective in achievement.objectives %}
+        <tr>
+            <td class="char-table">
+        {% if objective.monster %}
+            <b>Target: </b>
+            <a href="{{ url_for('main.monster', id=objective.monster.id) }}">{{ objective.monster.name }}</a>
+        {% elif objective.item %}
+            <b>Target: </b>
+            <a href="{{ url_for('main.item', id=objective.item.id) }}">{{ objective.item.name }}</a>
+        {% endif %}
+            </td>
 
-    <b>Reward gold: </b>{{ achievement.gold_reward }}<br>
+    {% if objective.progress < objective.total %}
+        <td class="char-table">
+        {{ objective.progress }}
+            <progress value="{{ objective.progress }}" max="{{ objective.total }}">   
+            </progress>
+        {{ objective.total }}<br>
+        </td>
+    {% endif %}
+    
+    </tr>
+    {% endfor %}
+    </table>
+
+    <b>Reward gold: </b>{{ achievement.reward_gold }}<br>
+    {% for item in achievement.reward_items %}
+        <b>Reward Item: </b> <a href="{{ url_for('main.item', id=item.item.id) }}">{{ item.item.name }}</a>
+        {{ item.quantity }}<br>
+    {% endfor %}
 </div>

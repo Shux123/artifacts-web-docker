@@ -95,18 +95,21 @@ class BuyGeOrder(FlaskForm):
     ge_submit = SubmitField('Buy')
 
 
-class CreateSellOrder(FlaskForm):
-    sell_item = SelectField('Item', choices=[], validators=[DataRequired()])
-    sell_quantity = IntegerField('Quantity', default=1,
+class CreateGeOrder(FlaskForm):
+    ge_choices = [('sell', 'Sell'),
+                        ('buy', 'Buy')]
+    ge_action = SelectField('Action', choices=ge_choices, validators=[DataRequired()])
+    ge_item = StringField('Item', validators=[DataRequired()])
+    ge_quantity = IntegerField('Quantity', default=1,
                         validators=[NumberRange(min=1, max=999)])
     price = IntegerField('Price', default=1,
                         validators=[NumberRange(min=1, max=999999)])
-    sell_submit = SubmitField('Create sell order')
+    ge_submit = SubmitField('Sell')
 
 
 class ItemGeHystory(FlaskForm):
     item_ge = SelectField('Item', choices=[], validators=[DataRequired()])
-    ge_submit = SubmitField('Get item hystory')
+    submit = SubmitField('Get item hystory')
 
 
 class DeleteItem(FlaskForm):

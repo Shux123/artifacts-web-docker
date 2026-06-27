@@ -148,11 +148,18 @@
         <b>Slot: </b> {{ log['content']['slot'] }}<br>
 
         {% elif log['type'] == 'new_task' %}
-            {% set i = Item.get_item_from_db(log['content']['task']) %}
             <b>Task type: </b>{{ log['content']['task_type'] }}<br>
-            <b>Task item: </b>
-            <a href="{{ url_for('main.item', id=i.id) }}">
-                {{ i.name }}</a><br>
+            {% if log['content']['task_type'] == 'items' %}
+                <b>Task item: </b>
+                {% set i = Item.get_item_from_db(log['content']['task']) %}
+                <a href="{{ url_for('main.item', id=i.id) }}">
+                    {{ i.name }}</a><br>
+            {% else %}
+                {% set monster = Monster.get_monster_from_db(log['content']['task']) %}
+            <b>Opponent: </b>
+                <a href="{{ url_for('main.monster', id=monster.id) }}">
+                    {{ monster.name }}</a><br>
+            {% endif %}
             <b>Quantity: </b>{{ log['content']['task_total'] }}<br>
 
         {% elif log['type'] == 'task_cancelled' %}

@@ -8,7 +8,8 @@ from ..models import (Character,
                         NPC,
                         Map,
                         Resource,
-                        BankItem)
+                        BankItem,
+                        Achievement)
 from .. import db
 from .forms import (MoveCharacter,
                     NpcBuySell,
@@ -20,7 +21,7 @@ from .forms import (MoveCharacter,
                     UseItem,
                     TaskTrade,
                     BuyGeOrder,
-                    CreateSellOrder,
+                    CreateGeOrder,
                     ItemGeHystory,
                     DeleteItem,
                     StartBotForm,
@@ -36,6 +37,7 @@ from sqlalchemy import distinct
 from ..all_requests import get_data_for_db
 from ..bot_tasks import bot
 from .. import r
+import re
 
 
 @char.errorhandler(404)
@@ -597,6 +599,21 @@ def char_map_tasks_master(char_name):
                            names=current_app.config['NAMES'])
 
 
+@char.route('/<char_name>/get_ge_action_choices/<action_category>')
+def get_ge_action_choices(char_name, action_category):
+    character = Character.query.filter_by(name=char_name).first()
+    choices = []
+    if action_category == 'sell':
+        for item in character.inventory_items.all():
+            if item.item:
+                choices.append((item.item.code, item.item.name))
+    elif action_category == 'buy':
+        items = Item.query.filter_by(tradeable=True).all()
+        for item in items:
+            choices.append((item.code, item.name))
+    return jsonify(sorted(choices))
+
+
 @char.route('/<char_name>/map/ge', methods=['GET', 'POST'])
 def char_map_ge(char_name):
     character = Character.query.filter_by(name=char_name).first()
@@ -623,33 +640,33 @@ def char_map_ge(char_name):
         move_form.y_coord.data = character.y
         move_form.layer.data = character.layer
 
-    sell_order_form = None
-    if character:
+    ge_order_form = None
+    if character: 
 
-        sell_order_form = CreateSellOrder()
-        inventory_items_names = []
-        for item in character.inventory_items.all():
-            if item.item:
-                inventory_items_names.extend([(item.item.code, item.item.name)])
-        sell_order_form.sell_item.choices = sorted(inventory_items_names)
+        ge_order_form = CreateGeOrder()
         
-        if sell_order_form.validate_on_submit():
-            item_code = sell_order_form.sell_item.data
-            sell_quantity = sell_order_form.sell_quantity.data
-            price = sell_order_form.price.data
+        if ge_order_form.validate_on_submit():
+            item_code = ge_order_form.ge_item.data
+            ge_action = ge_order_form.ge_action.data
+            ge_quantity = ge_order_form.ge_quantity.data
+            price = ge_order_form.price.data
             item = Item.query.filter_by(code=item_code).first()
             payload = {'code': item_code,
-                       'quantity': sell_quantity,
+                       'quantity': ge_quantity,
                        'price': price}
-            response = char_action_request(
-                                    char_name, 'grandexchange/sell', payload)
+            if ge_action == 'sell':
+                response = char_action_request(
+                        char_name, 'grandexchange/create-sell-order', payload)
+            elif ge_action == 'buy':
+                response = char_action_request(
+                        char_name, 'grandexchange/create-buy-order', payload)
             if response.status_code != 200:
                 flash(response.json()['error']['message'])
                 return redirect(url_for('char.get_char', char_name=char_name))
-            flash(f'{char_name} created grand exchange sell order.')
+            flash(f'{char_name} created grand exchange order.')
             response = response.json()['data']
             Character.update_character(response['character'])
-            response['order']['sell_order'] = True
+            response['order']['ge_order'] = True
             created_at = get_local_time(response['order']['created_at'])
             response['order']['created_at'] = created_at.strftime('%d-%m-%Y %H:%M')
             session['action_details'] = response['order']
@@ -672,7 +689,7 @@ def char_map_ge(char_name):
                            action_details=action_details,
                            move_form=move_form,
                            Item=Item,
-                           sell_order_form=sell_order_form,
+                           ge_order_form=ge_order_form,
                            names=current_app.config['NAMES'])
 
 
@@ -1002,18 +1019,29 @@ def ge_order(char_name, id):
     local_time = get_local_time(order['created_at'])
     order['created_at'] = local_time.strftime('%d-%m-%Y %H:%M')
     buy_ge_form = BuyGeOrder()
+    if order['type'] == 'buy':
+        buy_ge_form.ge_submit.label.text = 'Fill'
+        
     if buy_ge_form.validate_on_submit():
         quantity = buy_ge_form.ge_quantity.data
         payload = {'id': id, 'quantity': quantity}
-        response = char_action_request(char_name, 'grandexchange/buy', payload)
+        response = None
+        if order['type'] == 'sell':
+            response = char_action_request(char_name, 'grandexchange/buy', payload)
+        else:
+            response = char_action_request(char_name, 'grandexchange/fill', payload)
         if response.status_code != 200:
             flash(response.json()['error']['message'])
             return redirect(url_for('char.get_char', char_name=char_name))
         if character:
             response = response.json()['data']
             Character.update_character(response['character'])
-            flash(f'{char_name} bought item in grand exchange.')
-            response['order']['bought_order'] = True
+            if order['type'] == 'sell':
+                flash(f'{char_name} bought item in grand exchange.')
+                response['order']['bought_order'] = True
+            else:
+                flash(f'{char_name} sell item in grand exchange.')
+                response['order']['sold_order'] = True
             session['action_details'] = response['order']
             return redirect(url_for('char.get_char', char_name=char_name))
 
@@ -1271,3 +1299,48 @@ def stop_bot(char_name):
     r.lrem('bots', 0, char_name)
     flash(f'Bot has stopped for {char_name}')
     return redirect(url_for('main.index'))
+
+
+@char.route('/<char_name>/pending', methods=['GET', 'POST'])
+def pending(char_name):
+    character = Character.query.filter_by(name=char_name).first()
+
+    pending_items = []
+    p_items = get_data_for_db('/my/pending-items')
+    for p in p_items:
+        if p['claimed_at'] is None:
+            created_at = get_local_time(p['created_at'])
+            p['created_at'] = created_at.strftime('%d-%m-%Y %H:%M')
+            if p['source'] == 'achievement':
+                re_match = re.search(r'Achievement: (.*)', p['description'])
+                if re_match:
+                    achiev_name = re_match.group(1)    
+                achievement = Achievement.query.filter_by(name=achiev_name).first()
+                p['description'] = 'Achievement: '
+                p['achievement'] = achievement
+            pending_items.append(p)
+
+    cooldown = 0
+    if character:
+        cooldown = int(get_cooldown(character.cooldown_expiration))
+    if cooldown < 0:
+        cooldown = 0
+    return render_template('char/pending.html',
+                           character=character,
+                           Item=Item,
+                           Achievement=Achievement,
+                           pending_items = pending_items,
+                           cooldown=cooldown,
+                           names=current_app.config['NAMES'])
+
+
+@char.route('/<char_name>/claim_item/<id>')
+def claim_pending_item(char_name, id):
+    response = char_action_request(char_name, f'/claim_item/{id}')
+    if response.status_code == 200:
+        flash(f'{char_name} claimed pending items.')
+        Character.update_character(response.json()['data']['character'])
+    else:
+        flash(response.json()['error']['message'])
+
+    return redirect(url_for('char.get_char', char_name=char_name))

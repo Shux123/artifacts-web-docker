@@ -35,6 +35,59 @@ function updateChildChoices() {
             });
         }
         // Call on page load to initialize if a default parent is selected
-        $(document).ready(function() {
-            updateChildChoices();
+
+
+function updateGeChoices() {
+    var actionCategory = $('#ge_action').val();
+    // Safely get the character name from Flask template context
+    var charName = $('#ge-order-form').data('char-name'); 
+    
+    if (!actionCategory || !charName) {
+        return; 
+    }
+
+    // Dynamic URL matching your flask route structure
+    var url = '/' + charName + '/get_ge_action_choices/' + actionCategory;
+
+    $.getJSON(url, function(data) {
+        var targetSelect = $('#ge_item');
+        targetSelect.empty();
+        
+        $.each(data, function(index, item) {
+            targetSelect.append($('<option>', {
+                value: item[0], // item.code
+                text: item[1]   // item.name
+            }));
         });
+    });
+}
+
+function updateSubmitButtonText() {
+    var action = $('#ge_action').val();
+    var submitBtn = $('#ge_submit');
+    
+    if (action === 'buy') {
+        submitBtn.val('Buy');
+        submitBtn.text('Buy');
+    } else {
+        submitBtn.val('Sell');
+        submitBtn.text('Sell');
+    }
+}
+
+$(document).ready(function() {
+    updateChildChoices();
+    $('#action').change(function() {
+        updateChildChoices();
+    });
+
+    updateGeChoices();
+    updateSubmitButtonText();
+    
+    $('#ge_action').change(function() {
+        updateGeChoices();
+        updateSubmitButtonText();
+    });
+});
+
+

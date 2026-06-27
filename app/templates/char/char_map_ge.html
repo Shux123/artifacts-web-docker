@@ -106,10 +106,21 @@
         <b>Total price: </b> {{ action_details['total_price'] }}<br>
 {% endif %}
 
-{% if action_details['sell_order'] %}
+{% if action_details['sold_order'] %}
 <hr>
     {% set item = Item.get_item_from_db(action_details['code']) %}
-        <b>Created sell order.</b><br>
+        <b>Sold item: </b>
+        <a href="{{ url_for('main.item', id=item.id) }}">
+            {{ item.name }}</a><br>
+        <b>Quantity: </b>{{ action_details['quantity'] }}<br>
+        <b>Price: </b>{{ action_details['price'] }}<br>
+        <b>Total price: </b> {{ action_details['total_price'] }}<br>
+{% endif %}
+
+{% if action_details['ge_order'] %}
+<hr>
+    {% set item = Item.get_item_from_db(action_details['code']) %}
+        <b>Created GE order.</b><br>
         <b>Created at: </b>{{ action_details['created_at'] }}<br>
         <b>Item: </b>
         <a href="{{ url_for('main.item', id=item.id) }}">
@@ -117,7 +128,6 @@
         <b>Quantity: </b>{{ action_details['quantity'] }}<br>
         <b>Price: </b>{{ action_details['price'] }}<br>
         <b>Total price: </b> {{ action_details['total_price'] }}<br>
-        <b>Tax: </b>{{ action_details['tax'] }}<br>
 {% endif %}
 
 {% if character.map.content_type == 'grand_exchange' %}
@@ -141,12 +151,16 @@
 </nav>
 
 <hr>
-    <form method="POST">
-        {{ sell_order_form.hidden_tag() }}
-        {{ sell_order_form.sell_item.label }} {{ sell_order_form.sell_item }}
-        {{ sell_order_form.sell_quantity.label }} {{ sell_order_form.sell_quantity }}
-        {{ sell_order_form.price.label }} {{ sell_order_form.price }}
-        {{ sell_order_form.sell_submit() }}
+    <form id="ge-order-form" data-char-name="{{ character.name }}" method="POST">
+        {{ ge_order_form.hidden_tag() }}
+        {{ ge_order_form.ge_action.label }} {{ ge_order_form.ge_action }}
+        {{ ge_order_form.ge_item.label }}
+        <select name="ge_item" id="ge_item" required>
+            <option value="">Please select an Action first</option>
+        </select>
+        {{ ge_order_form.ge_quantity.label }} {{ ge_order_form.ge_quantity }}
+        {{ ge_order_form.price.label }} {{ ge_order_form.price }}
+        {{ ge_order_form.ge_submit() }}
     </form>
     <br>
 {% endif %}

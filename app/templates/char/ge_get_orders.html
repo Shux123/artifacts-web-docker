@@ -29,7 +29,8 @@
     
     {% for order in ge_orders %}
     <hr>
-        <b>Seller: </b>{{ order['seller'] }}<br>
+        <b>Seller account: </b>{{ order['account'] }}<br>
+        <b>Type: </b> {{ order['type']}}<br>
         {% set item = Item.get_item_from_db(order['code']) %}
         <b>Item: </b>
         <a href="{{ url_for('main.item', id=item.id) }}">
@@ -38,12 +39,15 @@
         <b>Price: </b>{{ order['price'] }}<br>
         <b>Total price: </b> {{ order['quantity'] *order['price'] }}<br>
         <b>Created at: </b>{{ order['created_at'] }}<br>
-        {% if character.account == order['seller'] %}
+        {% if character.account == order['account'] %}
             <a href="{{ url_for('char.cancel_ge_order', char_name=character.name, id=order['id']) }}">
                 Cancel order</a><br>
-        {% else %}
+        {% elif order.type == 'sell' %}
             <a href="{{ url_for('char.ge_order', char_name=character.name, id=order['id']) }}">
                 Buy this order</a><br>
+        {% elif order.type == 'buy' %}
+            <a href="{{ url_for('char.ge_order', char_name=character.name, id=order['id']) }}">
+                Fill this order</a><br> 
         {% endif %}
     {% endfor %}
 

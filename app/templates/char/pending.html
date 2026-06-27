@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+{% include 'char/_character_top.html' %}
+
+<div class="content-info-block">
+    <h4>Pending items</h4>
+
+    {% if not pending_items %}
+        There are no pending items now.
+    {% else %}
+
+    {% for p in pending_items %}
+        <b>Items: </b>
+        <table class="char-table">
+        {% for item in p['items'] %}
+            {% set i = Item.get_item_from_db(item['code']) %}
+            <tr>
+                <td class="char-table">
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="{{ url_for('main.item', id=i.id) }}">
+                    {{ i.name }}</a></td>
+                <td class="char-table">{{ item['quantity'] }}</td>
+                <td class="char-table">
+                    <a href="{{ url_for('char.claim_pending_item', char_name=character.name, id=p['id']) }}">Claim item</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+        <b>Source: </b>{{ p['source'] }}<br>
+        {% if p['source'] == 'achievement' %}
+            <b>Description: </b>{{ p['description'] }}
+            <a href="{{ url_for('main.achievement', id=p['achievement'].id) }}">{{ p['achievement'].name }}</a><br>
+        {% else %}
+            <b>Description: </b>{{ p['description'] }}<br>
+        {% endif %}
+        {% if p['gold'] %}
+            <b>Gold: </b>{{ p['gold'] }}
+        {% endif %}
+        <b>Created at: </b>{{ p['created_at'] }}<br>
+        <hr>
+    {% endfor %}
+    
+    {% endif %}
+
+</div>
+
+{% endblock %}
